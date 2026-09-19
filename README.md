@@ -49,7 +49,7 @@ After the setup below, these steps need your own accounts, once:
    gpg --export-secret-keys --armor "AStudyOnMyself backup"   # store this in your password manager
    ```
    Restoring needs the private key and its passphrase (`gpg --decrypt study-*.db.gpg > study.db`); without them the backups cannot be opened.
-5. **Ring data.** Apply for Partner API access at partner.ultrahuman.com (Ultrahuman decides; it can take days). When the token arrives, put it in `.env` as `ULTRAHUMAN_TOKEN`. Until then, and for exercise and time in daylight, use the Apple Health automation below.
+5. **Ring data.** Create a Personal API Token with the "Ring Data Access" scope in the Ultrahuman Vision developer portal (https://vision.ultrahuman.com/developer/docs) and confirm the 6-character passcode in the Ultrahuman app. Put the token in `.env` as `ULTRAHUMAN_TOKEN`, run the installer again and check with `node scripts/cli.ts sync-ring 7`. Without a token, and for exercise and time in daylight in any case, use the Apple Health automation below. The protocol fixes each factor's source at the study start, so set this up before it.
 6. **Indoor air.** Run `node scripts/cli.ts alexa-login` in this folder (set `ALEXA_DOMAIN=amazon.ca` in `.env` first if your Alexa account is Canadian). It prints an Amazon address: sign in there in your browser, then copy the address of the empty page you land on and paste it back. Your password goes only to Amazon. The app appears in your Amazon account's device list as "A Study On Myself"; deregistering it there revokes the sign in.
 7. **Study start.** When the protocol is finalized, set the study start in Settings to the day after; earlier reports are pilot data and never enter a model.
 

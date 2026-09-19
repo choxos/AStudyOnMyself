@@ -3,6 +3,25 @@
   const pp = (v) => (v > 0 ? "+" : "") + v.toFixed(1) + " pp";
   const pct = (v) => Math.round(v) + "%";
   const status = document.getElementById("status");
+  const set = (id, text) => { document.getElementById(id).textContent = text; };
+
+  // The study calendar from the protocol: data collection from 20 September 2026,
+  // an interim analysis at 6 months and the final one at 12 months.
+  const START = new Date(2026, 8, 20), INTERIM = new Date(2027, 2, 20), FINAL = new Date(2027, 8, 20);
+  const long = (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = Math.round((today - START) / 864e5) + 1;
+  if (day < 1) {
+    set("study-day", "Not started");
+    set("study-day-note", `Data collection starts on ${long(START)}.`);
+  } else {
+    set("study-day", `Day ${Math.min(day, 365)}`);
+    set("study-day-note", day > 365 ? "Data collection is complete." : `of 365, since ${long(START)}`);
+  }
+  const next = today < INTERIM ? ["Interim", INTERIM] : ["Final", FINAL];
+  set("next-analysis", next[1].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }));
+  set("next-note", `${next[0]} analysis, ${next[0] === "Interim" ? "6" : "12"} months after the start.`);
 
   function tone(p) {
     if (p.evidence !== "strong" && p.evidence !== "moderate") return "neutral";
@@ -18,9 +37,11 @@
   }
 
   function render(r) {
-    const updated = new Date(r.updated).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    const updated = new Date(r.updated).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
     const check = r.diagnostics.converged ? "sampler converged" : "sampler diagnostics need attention";
-    status.textContent = `Updated ${updated}. Based on ${r.sample.ratings} reports over ${r.sample.days} days; ${check}.`;
+    status.textContent = `Updated ${updated}; ${check}.`;
+    set("n-reports", String(r.sample.ratings));
+    set("n-note", `on ${r.sample.days} days`);
     document.getElementById("results").hidden = false;
 
     if (r.predictors.length) {
@@ -66,5 +87,5 @@
   fetch("results.json", { cache: "no-cache" })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
     .then(render)
-    .catch(() => { status.textContent = "No results have been published yet. The model needs about two weeks of reports first."; });
+    .catch(() => { status.textContent = "No estimates have been published yet: the model first needs about two weeks of reports."; });
 })();

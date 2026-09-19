@@ -3,80 +3,119 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Live results of an N-of-1 Bayesian study of what goes with my daily mood. Estimates only; no data is published.">
+  <meta name="description" content="Live results of an N-of-1 Bayesian study of what goes with one person&#39;s daily mood. Estimates only; no data are published.">
+  <meta name="color-scheme" content="light dark">
   <title>A Study On Myself: live results</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="site.css">
 </head>
 <body>
-  <nav class="nav">
-    <a class="brand" href="./">A Study On Myself</a>
-    <a href="./" aria-current="page">Results</a>
-    <a href="protocol.html">Protocol</a>
-    <a href="review.html">Review record</a>
-  </nav>
-  <main>
-    <h1>A Study On Myself</h1>
-    <p class="muted">Live results of a one-person study of what goes with my mood.</p>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header"><div class="bar">
+    <a class="brand" href="./"><img src="icon.svg" alt=""><span>A Study On Myself</span></a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./" aria-current="page">Results</a>
+      <a href="protocol.html">Protocol</a>
+      <a href="review.html">Review record</a>
+      <a href="https://github.com/choxos/AStudyOnMyself">Code</a>
+    </nav>
+  </div></header>
+  <main class="page" id="content">
+<section class="hero">
+  <p class="eyebrow">An N-of-1 study of mood</p>
+  <h1>A Study On Myself</h1>
+  <p class="lede">Which daily factors go with one person's mood? Three times a day I rate my mood as Sad, Meh or Happy.
+    Sleep, activity, weather and indoor air are recorded automatically, and a Bayesian model estimates how each factor
+    goes with a better or worse mood. This page shows its estimates as they update; the data themselves are never published.</p>
+  <div class="actions">
+    <a class="btn primary" href="protocol.html">Read the protocol</a>
+    <a class="btn" href="review.html">Review record</a>
+    <a class="btn" href="https://github.com/choxos/AStudyOnMyself">Source code</a>
+  </div>
+</section>
 
-    <section class="card">
-      <p>Three times a day I rate my mood as Sad, Meh or Happy, and I log sleep, activity, screen time, caffeine, alcohol,
-        time with people and a few other things; weather is added automatically. A Bayesian model refits by itself as new reports
-        arrive and this page updates with it.</p>
-      <p><strong>Only the model's estimates are published.</strong> The reports, notes, daily values and anything else
-        from which the data could be reconstructed stay on my own computer.</p>
-      <p id="status" class="muted small">Loading results…</p>
-    </section>
+<section class="stats" aria-label="Study status">
+  <div class="stat"><span class="label">Study day</span><span class="value" id="study-day">&nbsp;</span><span class="note" id="study-day-note">&nbsp;</span></div>
+  <div class="stat"><span class="label">Reports modeled</span><span class="value" id="n-reports">None yet</span><span class="note" id="n-note">The first estimates need 30 reports on 14 days.</span></div>
+  <div class="stat"><span class="label">Next analysis</span><span class="value" id="next-analysis">&nbsp;</span><span class="note" id="next-note">&nbsp;</span></div>
+</section>
+<p id="status" class="status-note" aria-live="polite">Loading results…</p>
 
-    <div id="results" hidden>
-      <section class="card">
-        <h2>What goes with a Happy report</h2>
-        <p class="small muted">Change in the chance that a report is Happy for one unit more of each factor, with the other factors held fixed.
-          Dots are posterior medians and lines 95% credible intervals. Blue: moderate or strong evidence of a better mood;
-          red: of a worse mood; gray: unclear. The five factors of the confirmatory hypotheses stay gray: they are judged only
-          at the 6- and 12-month analyses set out in the <a href="protocol.html">protocol</a>.</p>
-        <div class="chart" id="effects-chart"></div>
-        <details><summary>Table view</summary>
-          <div class="table-wrap"><table>
-            <thead><tr><th>Factor</th><th>Unit</th><th class="num">Odds ratio (95% CrI)</th><th class="num">Happy, pp</th><th class="num">Sad, pp</th><th class="num">P(better)</th><th>Evidence</th></tr></thead>
-            <tbody id="effects-table"></tbody>
-          </table></div>
-        </details>
-        <p class="small muted" id="no-effects" hidden>No daily factor has enough data yet.</p>
-      </section>
-
-      <div class="grid">
-        <section class="card">
-          <h2>Time of day</h2>
-          <p class="small muted">Chance of a Happy report in each slot.</p>
-          <div class="chart" id="tod-chart"></div>
-        </section>
-        <section class="card">
-          <h2>Weekday</h2>
-          <p class="small muted">Chance of a Happy report on each weekday.</p>
-          <div class="chart" id="weekday-chart"></div>
-        </section>
-      </div>
-
-      <section class="card">
-        <h2>Mood dynamics</h2>
-        <p id="dynamics"></p>
-      </section>
+<div id="results" hidden>
+  <section class="section">
+    <h2>What goes with a Happy report</h2>
+    <p class="intro">Change in the chance that a report is Happy for one unit more of each factor, with the other factors held fixed.
+      Dots are posterior medians and lines 95% credible intervals. Blue: moderate or strong evidence of a better mood;
+      red: of a worse mood; gray: unclear. The factors of the confirmatory hypotheses stay gray until the 6 and 12 month analyses.</p>
+    <div class="card">
+      <div class="chart" id="effects-chart"></div>
+      <details class="more"><summary>Table view</summary>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Factor</th><th>Unit</th><th class="num">Odds ratio (95% CrI)</th><th class="num">Happy, pp</th><th class="num">Sad, pp</th><th class="num">P(better)</th><th>Evidence</th></tr></thead>
+          <tbody id="effects-table"></tbody>
+        </table></div>
+      </details>
+      <p class="small muted" id="no-effects" hidden>No daily factor has enough data yet.</p>
     </div>
+  </section>
 
-    <section class="card">
-      <h2>Method</h2>
-      <p class="small">Each report is modeled with a Bayesian cumulative logit (ordinal) model. The linear predictor adds effects for time of day and weekday
-        (sum-to-zero), the day's factors, and a latent daily mood that follows a stationary first-order autoregressive process, so moods can carry over
-        from one day to the next and days without reports are handled naturally. Factors are standardized; the five in the hypotheses have normal(0, 0.5) priors and the others share a hierarchical shrinkage prior;
-        cutpoints are ordered. Factors enter only with information available before the day's reports: last night's sleep and physiology, yesterday's
-        behavior, and same-day context such as weather or a work day. Missing factor values are imputed within the model, which assumes they are missing
-        at random. The model is written in Stan and fitted from R with cmdstanr (NUTS, four chains), with convergence checked by R-hat, effective sample size and divergences.</p>
-      <p class="small">"Evidence" is the posterior probability that an effect points the way shown: strong at 97.5% or more (the 95% interval excludes zero),
-        moderate at 90%, weak at 75%. With many factors some moderate results will be chance findings. These are associations in observational data
-        from one person; they are not causal effects and say nothing about anyone else.</p>
-    </section>
-    <p class="small muted">A Study On Myself · estimates only, no data · <a href="protocol.html">study protocol</a></p>
+  <section class="section">
+    <h2>Rhythms</h2>
+    <p class="intro">The model's chance of a Happy report by time of day and by weekday, with 95% credible intervals.</p>
+    <div class="grid">
+      <div class="card"><h3>Time of day</h3><div class="chart" id="tod-chart"></div></div>
+      <div class="card"><h3>Weekday</h3><div class="chart" id="weekday-chart"></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Mood dynamics</h2>
+    <div class="card"><p id="dynamics" class="prose"></p></div>
+  </section>
+</div>
+
+<section class="section">
+  <h2>Prespecified hypotheses</h2>
+  <p class="intro">Fixed in the protocol before data collection began, and judged at 6 and 12 months by a posterior probability rule
+    (<a href="protocol.html#confirmatory-analysis-and-decision-rule">Section 2.9.5</a>). Until then their estimates are shown without a verdict.</p>
+  <ul class="hypotheses">
+    <li><span class="id">H1</span><p>Longer sleep last night goes with higher mood.</p></li><li><span class="id">H2</span><p>More steps yesterday go with higher mood.</p></li><li><span class="id">H3a</span><p>More screen time other than social media yesterday goes with lower mood.</p></li><li><span class="id">H3b</span><p>More social media time yesterday goes with lower mood.</p></li><li><span class="id">H4</span><p>More time in person with friends or family yesterday goes with higher mood.</p></li><li><span class="id">H5</span><p>The latent daily mood carries over from one day to the next (positive carry-over, φ &gt; 0).</p></li>
+  </ul>
+</section>
+
+<section class="section">
+  <h2>How the study works</h2>
+  <div class="steps">
+    <div class="card"><span class="step-no">1</span><h3>Measure</h3>
+      <p>A tap on the phone three times a day records momentary mood, and an evening question rates the whole day.
+        A smart ring, Apple Health, a weather service and an indoor air monitor add the daily factors automatically.</p></div>
+    <div class="card"><span class="step-no">2</span><h3>Model</h3>
+      <p>A Bayesian ordinal model with a latent daily mood that carries over between days, effects for time of day and weekday,
+        and the day's factors. It is written in Stan and refits every hour as new reports arrive.</p></div>
+    <div class="card"><span class="step-no">3</span><h3>Publish</h3>
+      <p>Only fits that pass the convergence checks are published, and only their estimates: effects with 95% credible intervals.
+        Reports, notes and daily values stay on the participant's computer.</p></div>
+  </div>
+  <details class="more prose"><summary>Technical details of the model</summary>
+    <p>Each report is modeled with a Bayesian cumulative logit (ordinal) model. The linear predictor adds effects for time of day and weekday
+      (sum-to-zero), the day's factors, and a latent daily mood that follows a stationary first-order autoregressive process, so moods can carry over
+      from one day to the next and days without reports are handled naturally. Factors are standardized; the five in the hypotheses have normal(0, 0.5)
+      priors and the others share a hierarchical shrinkage prior; cutpoints are ordered. Factors enter only with information available before the day's
+      reports: last night's sleep and physiology, yesterday's behavior, and same-day context such as weather or a work day. Missing factor values are
+      imputed within the model, which assumes they are missing at random. The model is fitted from R with cmdstanr (NUTS, four chains), with
+      convergence checked by R-hat, effective sample size and divergent transitions.</p>
+    <p>"Evidence" is the posterior probability that an effect points the way shown: strong at 97.5% or more (the 95% interval excludes zero),
+      moderate at 90%, weak at 75%. With many factors some moderate results will be chance findings. These are associations in observational data
+      from one person; they are not causal effects and say nothing about anyone else.</p>
+  </details>
+</section>
   </main>
+  <footer class="site-footer"><div class="bar">
+    <p>A Study On Myself is an N-of-1 study of one person's mood, by <a href="https://choxos.github.io">Ahmad Sofi-Mahmudi</a>.
+      Only model estimates are published; the data stay on the participant's own computer.</p>
+    <p><a href="protocol.html">Protocol 3.0, final</a> · <a href="review.html">Review record</a> · <a href="https://github.com/choxos/AStudyOnMyself">Source code (GPL-3.0)</a></p>
+  </div></footer>
   <script src="charts.js"></script>
   <script src="results.js"></script>
 </body>

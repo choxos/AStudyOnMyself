@@ -17,6 +17,7 @@ import { BACKUP_GPG_RECIPIENT, DEFAULT_TIME_ZONE } from "../server/config.ts";
 import { all, get } from "../server/db.ts";
 import { createInterface } from "node:readline/promises";
 import { backupDue, backupNow, publish, syncWeather } from "../server/maintenance.ts";
+import { notify } from "../server/push.ts";
 import { alexaSignInFinish, alexaSignInStart, syncIndoorAir, syncUltrahuman } from "../server/sources.ts";
 
 const [command, ...args] = process.argv.slice(2);
@@ -94,6 +95,14 @@ switch (command) {
   case "sync-air":
     log(await syncIndoorAir());
     break;
+  case "push-test": {
+    // One notification to every device with reminders on; 201 means the push service accepted it.
+    for (const user of all<{ id: number; username: string }>("SELECT DISTINCT u.id, u.username FROM users u JOIN push_subscriptions p ON p.user_id = u.id")) {
+      const statuses = await notify(user.id, { title: "A Study On Myself", body: "Test: reminders reach this device.", url: "/rate/" });
+      log(`${user.username}: push service answered ${statuses.join(", ")}.`);
+    }
+    break;
+  }
   case "alexa-login": {
     // The password and any one-time code go only to Amazon's own page, in the browser.
     const start = alexaSignInStart();
@@ -118,6 +127,6 @@ switch (command) {
     break;
   }
   default:
-    console.log("Commands: create-user, set-password, refit, maintain, sync-weather, sync-ring, sync-air, alexa-login, backup, publish");
+    console.log("Commands: create-user, set-password, refit, maintain, sync-weather, sync-ring, sync-air, alexa-login, push-test, backup, publish");
     process.exitCode = command ? 1 : 0;
 }
