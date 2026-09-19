@@ -1,0 +1,166 @@
+{
+  "verdict": "accept",
+  "summary": "Section 2.9.8 now specifies the proportional odds check as a diagnostic variant, not a change to ordinal-ar1-stan-v4, with independent N(0, 0.5) priors on the two threshold-specific coefficients, an ordering constraint for every report, and model version ordinal-ar1-ppo-check-v1 to be added before the 6-month analysis. The safety notice updates after reports the app sends and when a page returns to the screen or reconnects, and a fit is published only if it used the study start set at publication. I am satisfied the protocol can be finalized.",
+  "prior_points": [
+    {
+      "id": "M1",
+      "status": "resolved",
+      "comment": "No regression: load_dataset still requires users.study_start and still drops earlier reports."
+    },
+    {
+      "id": "M2",
+      "status": "resolved",
+      "comment": "No regression: other screen time is still recoded when social media time is modeled."
+    },
+    {
+      "id": "M3",
+      "status": "resolved",
+      "comment": "No regression: the pre-report claim and the adjustment covariates are unchanged."
+    },
+    {
+      "id": "S1",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S2",
+      "status": "resolved",
+      "comment": "No regression: the stored design files still match Section 2.6."
+    },
+    {
+      "id": "S3",
+      "status": "resolved",
+      "comment": "No regression: Ultrahuman values are still filed only under the requested date."
+    },
+    {
+      "id": "S4",
+      "status": "resolved",
+      "comment": "No regression: day_satisfaction.stan remains day-ordinal-ar1-stan-v2 and still takes confirmatory_scale as data."
+    },
+    {
+      "id": "S5",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S6",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S7",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S8",
+      "status": "resolved",
+      "comment": "No regression: public results still replace confirmatory evidence labels, and the home headline still omits those factors."
+    },
+    {
+      "id": "S9",
+      "status": "resolved",
+      "comment": "Declined for a sound reason. Section 2.9.3 still states independent N(0, 1) imputation of the overnight block; sensitivity (7) remains the check."
+    },
+    {
+      "id": "S10",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S11",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S12",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S13",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "m1",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "m2",
+      "status": "resolved",
+      "comment": "No regression; Section 3.2 still matches the code (last 30 backups)."
+    },
+    {
+      "id": "m3",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "m4",
+      "status": "resolved",
+      "comment": "No regression; weekly adherence still counts only slots that have begun."
+    },
+    {
+      "id": "m5",
+      "status": "resolved",
+      "comment": "No regression; the Ultrahuman date-key rule is still implemented and tested."
+    },
+    {
+      "id": "m6",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "m7",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "m8",
+      "status": "resolved",
+      "comment": "No regression."
+    },
+    {
+      "id": "S20",
+      "status": "resolved",
+      "comment": "No regression: mood.stan and day_satisfaction.stan still take confirmatory_scale as data."
+    },
+    {
+      "id": "S21",
+      "status": "resolved",
+      "comment": "No regression: publishable still requires a match to the study start set at the call; tag comparisons on the trends page are now shown only from a run under that start."
+    },
+    {
+      "id": "S22",
+      "status": "resolved",
+      "comment": "No regression: Section 2.9.5 still covers other screen time dropped while social media time remains."
+    },
+    {
+      "id": "m20",
+      "status": "resolved",
+      "comment": "No regression; Section 2.6 still matches the stored first-run files."
+    },
+    {
+      "id": "m21",
+      "status": "resolved",
+      "comment": "No regression; begunSlots still counts only slots whose start has passed."
+    },
+    {
+      "id": "S23",
+      "status": "resolved",
+      "comment": "Section 2.9.8 now names a diagnostic variant, gives independent N(0, 0.5) priors on the two coefficients, requires ordered cumulative logits for every report (observed and imputed), and names ordinal-ar1-ppo-check-v1 to be added before the 6-month analysis."
+    }
+  ],
+  "must_fix": [],
+  "should_fix": [],
+  "minor": [
+    {
+      "id": "m22",
+      "section": "2.9.8",
+      "problem": "A factor that fails the proportional odds check is to be reported with both coefficients next to its confirmatory result. Those coefficients are on the standardized log-odds scale, while the confirmatory result is an odds ratio per natural unit, so the two numbers are not comparable as written.",
+      "requested_change": "Say that the two threshold-specific effects are reported on the same scale as the confirmatory estimand (odds ratio per natural unit, with 95% intervals), or say that they are log-odds per standard deviation."
+    }
+  ]
+}

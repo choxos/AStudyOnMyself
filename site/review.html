@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How the study protocol was reviewed by two AI models, with every report and response.">
+  <title>Review record · A Study On Myself</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="./">A Study On Myself</a>
+    <a href="./">Results</a>
+    <a href="protocol.html">Protocol</a>
+    <a href="review.html" aria-current="page">Review record</a>
+  </nav>
+  <main class="doc">
+<h1 id="review-record">Review record</h1>
+<p>Version 3.0 of the protocol of A Study On Myself was reviewed by two
+AI models before it was finalized: GPT-6-Astra (OpenAI), run through the
+Codex command line tool, and Grok 4.6 (xAI), run through the Grok
+command line tool, both at reasoning effort xhigh. <strong>This is
+review by AI models, not peer review by human experts.</strong></p>
+<p>How the review worked:</p>
+<ul>
+<li>Each reviewer received the protocol and a copy of the study software
+(the Stan model, the R analysis code, the database schema and the web
+application) in a read-only folder, without any study data,
+configuration or machine names. The two reviewers worked independently
+and did not see each other’s reports.</li>
+<li>Both received the same instructions, reproduced at the end of this
+page. They sort every point into must fix (a false statement or one the
+code contradicts, a statistical error, a missing element without which
+the study cannot be evaluated or carried out as described, or an
+internal contradiction), should fix, and minor. A reviewer accepts when
+no must-fix point remains.</li>
+<li>After each round, the investigator answered every point and revised
+the protocol. From round 2 on, each reviewer received its own previous
+report, the response to it, the changes to the protocol and a fresh copy
+of the software, and marked each earlier point as resolved or not.</li>
+<li>The review ran for four rounds. Grok 4.6 accepted the protocol from
+round 2 on. GPT-6-Astra’s round 4 report left one must-fix point, the
+order in which the rating page applies the server’s answers about the
+safety rule; it was fixed and tested, and the participant finalized the
+protocol on 19 September 2026 without a fifth round. After round 4, the
+protocol text changed only in the administrative information, the
+revision history, the pilot dates, the tense of the review section and
+one clarification that the last Grok 4.6 report asked for.</li>
+<li>The reports are shown as the reviewers returned them, in structured
+form; only the layout is added here. Each version the reviewers received
+is linked from the table below, and the scripts that ran the review
+(<code>peer-review/run-review.sh</code>,
+<code>peer-review/snapshot.sh</code> and
+<code>peer-review/extract.ts</code>) are kept with the study software.
+The Codex event logs in <code>peer-review/</code> are kept as recorded,
+except that <code>extract.ts</code> replaces paths in the home folder
+with <code>~</code> and leaves out the output of commands that read
+files outside the review workspace, such as the reviewer tool’s own
+settings and plugins.</li>
+</ul>
+
+<div class="table-wrap"><table>
+<thead><tr><th>Round</th><th>Protocol</th><th>GPT-6-Astra</th><th>Grok 4.6</th></tr></thead>
+<tbody><tr><td><a href="#round-1">Round 1</a></td><td><a href="versions/round-1.html">Version reviewed</a></td>
+<td>Revise</td><td>Revise</td></tr><tr><td><a href="#round-2">Round 2</a></td><td><a href="versions/round-2.html">Version reviewed</a></td>
+<td>Revise</td><td>Accept</td></tr><tr><td><a href="#round-3">Round 3</a></td><td><a href="versions/round-3.html">Version reviewed</a></td>
+<td>Revise</td><td>Accept</td></tr><tr><td><a href="#round-4">Round 4</a></td><td><a href="versions/round-4.html">Version reviewed</a></td>
+<td>Revise</td><td>Accept</td></tr></tbody>
+</table></div>
+<h2 id="round-1">Round 1</h2>
+<section class="card review" id="round-1-gpt-6-astra">
+<h3>GPT-6-Astra: Revise</h3>
+<p class="small muted">OpenAI GPT-6-Astra through the Codex command line tool (codex-cli 0.155.1), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> Core ordinal AR(1) model matches its mathematical specification, but statistical errors, software contradictions, privacy failures, and unresolved ethics requirements prevent acceptance. Pending connectors and design-analysis results are not themselves objections. Review used source inspection, primary references, and selected read-only probes; a full Stan fit was not run.</p>
+
+<h4>Must fix</h4>
+<ol class="points"><li><strong>M1</strong> <span class="muted">(Administrative Information)</span> Status says collection started September 19, 2026, contradicting the supplied context that collection has not started.
+  <br><em>Requested change:</em> Correct collection status and distinguish planned start, protocol finalization, and actual first collection dates.</li><li><strong>M2</strong> <span class="muted">(Abstract; Sections 2.4 and 2.9.3)</span> The universal claim that factors contain only information available before reports conflicts with same-day full-day weather and context recorded in the evening. Weather being unaffected by mood does not make its completed daily summary available beforehand.
+  <br><em>Requested change:</em> State explicit exceptions for retrospective contemporaneous associations, or change exposure windows to enforce temporal precedence. Distinguish predetermined context from events or assessments occurring after reports.</li><li><strong>M3</strong> <span class="muted">(Section 2.4; software/server/maintenance.ts:69)</span> Weather collection is described as covering complete days, but syncWeather() calculates yesterday in UTC while requesting daily aggregation in the user&#39;s time zone. During Toronto evenings, it can request the still-incomplete local day.
+  <br><em>Requested change:</em> Calculate the last complete date in the aggregation time zone. Document whether weather uses calendar days or the 4 AM study-day boundary.</li><li><strong>M4</strong> <span class="muted">(Section 2.9.3)</span> The statement that skipped reports bias effect estimates only when skipping also depends on factors is false. Observation depending on ordinal mood alone can change cumulative-logit slopes, without additional direct dependence on predictors.
+  <br><em>Requested change:</em> Remove this claimed protection and acknowledge that mood-dependent nonresponse can bias associations as well as average mood.</li><li><strong>M5</strong> <span class="muted">(Section 2.9.4; software/analysis/mood.R:220)</span> Probability comparisons for work, travel, and sickness add one to every observed value. Reports already at 1 therefore compare the impossible value 2 with 1, despite labels such as &#39;work day vs. day off.&#39;
+  <br><em>Requested change:</em> For binary factors, predict each report with the factor set to 1 and to 0, then average their probability difference. Specify this contrast separately from continuous increments.</li><li><strong>M6</strong> <span class="muted">(Section 2.9.8; software/analysis/refit.R; software/scripts/cli.ts)</span> Fits are not used only after passing convergence criteria. summarize_fit() records a Boolean, but refit.R still saves draws and returns status &#39;done&#39;; subsequent code displays, publishes, and uses those fits for predictions.
+  <br><em>Requested change:</em> Enforce the stated convergence gate, or accurately describe flagged display and specify which inferential uses are prohibited. Prespecify remediation when diagnostics fail.</li><li><strong>M7</strong> <span class="muted">(Sections 2.9.5 and 2.9.7; software/analysis/mood.R:223)</span> Directional probabilities are rounded before evidence classification. For example, 3899 positive draws out of 4000 gives 0.97475, which rounds to 0.975 and receives &#39;strong&#39; evidence despite missing the stated threshold.
+  <br><em>Requested change:</em> Apply all decision thresholds to unrounded probabilities and round only displayed values.</li><li><strong>M8</strong> <span class="muted">(Section 2.6; software/analysis/simulate.R; software/analysis/design.R)</span> Simulation coverage uses mismatched truth scales. Generation standardizes complete predictors before missingness and lagging; fitting standardizes observed lagged predictors on rated days. design.R nevertheless compares fitted coefficients directly with TRUE_BETA. simulate.R also calculates the generating odds ratio using the fitted rather than generating standard deviation.
+  <br><em>Requested change:</em> Retain generating scales or physical-unit slopes, transform truth onto the fitted scale, and recompute coverage and true odds ratios. Account consistently for rounding of generated predictors.</li><li><strong>M9</strong> <span class="muted">(Section 2.9.8; software/package.json)</span> Parameter recovery is described as part of the software test suite, but the supplied snapshot contains no analysis/tests/testthat directory, which the test:r command requires. simulate.R prints recovery summaries without automated assertions.
+  <br><em>Requested change:</em> Supply the referenced executable recovery tests, or describe the existing script accurately as a simulation diagnostic rather than an automated recovery test.</li><li><strong>M10</strong> <span class="muted">(Section 2.7; software/server/pages.ts:186; software/server/routes.ts:145)</span> Automatic sources and the evening form can overwrite each other. The form submits all fields, including stale or blank automatic values. A form opened before an automatic update can replace that update; blank submissions become null.
+  <br><em>Requested change:</em> Preserve intervening updates by submitting only edited fields and resolving conflicts, or adopt another explicit source-precedence mechanism. Correct the absolute nonoverwriting claim.</li><li><strong>M11</strong> <span class="muted">(Sections 2.7 and 3.2; software/server/routes.ts:104)</span> Device tokens can read existing daily data through POST responses. A date-only POST to /api/daily/ returns the existing row, including notes and factors. Read-only probing confirmed this behavior. Tokens can also overwrite existing daily values.
+  <br><em>Requested change:</em> Return an acknowledgment without existing record contents for device submissions, define permitted update scope accurately, and test confidentiality through POST responses as well as blocked GET requests.</li><li><strong>M12</strong> <span class="muted">(Section 3.2; software/server/maintenance.ts:106; software/tests/app.test.ts:225)</span> The publication whitelist is not exhaustive at nested levels. time_of_day, weekday, and dynamics pass through wholesale. Unexpected nested notes and daily values survived a read-only probe, while the existing fixed-fixture test does not enforce the claimed guarantee.
+  <br><em>Requested change:</em> Whitelist nested fields explicitly and test unexpected nested fields in serialized output, or narrow the stated guarantee to what is actually enforced.</li><li><strong>M13</strong> <span class="muted">(Abstract; Section 3.2)</span> All study data do not stay on the computer. Queued reports and notes reside in phone localStorage, cached rating pages contain recent tags, and upstream providers retain source data. Password changes and token revocation do not erase phone copies. Application deletion also retains encrypted backups.
+  <br><em>Requested change:</em> Describe each storage location, protection, retention, and deletion boundary accurately. Explain lost-phone handling and distinguish application deletion from removal of phone copies, backups, and public artifacts.</li><li><strong>M14</strong> <span class="muted">(Sections 2.3.3 and 2.11; software/server/stats.ts:9)</span> Promised adherence reporting differs from implementation. completion() reports one rolling 14-day fraction with a fixed denominator of 42, including pre-study or unelapsed slots. It does not provide separate weekly proportions, and public results contain no adherence despite &#39;alongside every result.&#39;
+  <br><em>Requested change:</em> Define eligible-slot denominators and implement the stated weekly reporting, or identify it accurately as planned work. Specify how two consecutive weeks below 50% will be assessed.</li><li><strong>M15</strong> <span class="muted">(Section 3.1 Ethics)</span> Self-participation does not establish exemption from ethics review, and checking requirements only before publication is too late if prior review applies. Institutional policies can explicitly require review of self-experimentation, as this [UBC policy](https://researchethics.ubc.ca/sites/default/files/documents/Self-experimentation.pdf) illustrates.
+  <br><em>Requested change:</em> Replace the general exemption claim with the applicable institutional and jurisdictional review plan. Resolve approval, exemption, or documented nonapplicability before collection, and reassess before randomized experiments.</li><li><strong>M16</strong> <span class="muted">(Section 2.4, mood-rhythm rationale)</span> Roenneberg et al. (2003) studies sleep timing, daylight exposure, and chronotype, not daily or weekly mood rhythms. It does not support the attached mood claim. See the [original article](https://doi.org/10.1177/0748730402239679).
+  <br><em>Requested change:</em> Replace this citation with evidence measuring mood rhythms, or narrow the statement to the outcomes actually studied.</li></ol>
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S1</strong> <span class="muted">(Sections 1.3 and 2.9.5)</span> H3b&#39;s conditional interpretation remains implicit. With total screen time and social media entered together, its coefficient represents replacing other screen time with social media while holding total screen time fixed.
+  <br><em>Requested change:</em> State this substitution estimand explicitly. If the intended comparison adds social media while holding other screen time fixed, use the sum of the two physical-unit slopes instead.</li><li><strong>S2</strong> <span class="muted">(Sections 2.9.3 and 2.9.9)</span> Independent standard-normal imputation ignores predictor correlations and temporal structure, and permits impossible values for binary indicators. MAR alone does not justify these distributional assumptions.
+  <br><em>Requested change:</em> Add a sensitivity analysis using predictor-type-appropriate conditional imputation, or assess this approximation under correlated, autocorrelated, and binary predictors in simulation.</li><li><strong>S3</strong> <span class="muted">(Sections 2.3.1 and 2.9.9)</span> Complete-case analysis does not assess mood-dependent nonresponse. Additional spontaneous reports can also give unusually good or bad periods greater weight, although the report-weighted estimand is explicitly defined.
+  <br><em>Requested change:</em> Add an informative-missingness sensitivity analysis and a prespecified comparison using one report per slot or equal day weights. Record prompted versus spontaneous reports where feasible.</li><li><strong>S4</strong> <span class="muted">(Section 2.6; software/analysis/design.R)</span> Current simulations provide a narrow assessment: mostly independent predictors, one positive phi value, no active social-media or social-contact alternative, and no stated precision target. Fifty replicates provide limited precision for operating characteristics.
+  <br><em>Requested change:</em> Prespecify a meaningful interval-width target; include plausible predictor correlations, missingness, phi = 0, and alternatives for H3b and H4. Report Monte Carlo uncertainty, failed-fit handling, and distinguish marginal false-direction rates from family-level error.</li><li><strong>S5</strong> <span class="muted">(Sections 2.9.2 and 2.9.8)</span> Prior predictive behavior is not checked, and category-frequency checks alone weakly assess the model&#39;s main structural assumptions.
+  <br><em>Requested change:</em> Add prior predictive checks and posterior checks of within-day clustering, between-day dependence, and threshold-specific associations. Specify the response to substantial lack of fit or unreliable PSIS diagnostics.</li><li><strong>S6</strong> <span class="muted">(Sections 2.4 and 2.8)</span> Several measurement rules remain underspecified: actual source and HRV metric, overnight aggregation, overlapping Apple Health samples, standard-drink definition, indoor-monitor placement, and calendar-day alignment during travel. Weather remains tied to configured home coordinates.
+  <br><em>Requested change:</em> Freeze a factor-level collection dictionary before collection, including source precedence, aggregation windows, units, travel handling, provenance, and recording of device or firmware changes. Specify how source changes enter analysis as breaks.</li><li><strong>S7</strong> <span class="muted">(Section 2.10)</span> Prospective experiment amendments are appropriate, but their required content omits explicit treatment estimands, adherence and deviation handling, period effects, masking feasibility, and registration plans.
+  <br><em>Requested change:</em> Extend the amendment template with these items, allocation concealment, carryover analysis, and appropriate restriction of adjustment to pretreatment variables. Map it to [SPENT](https://www.bmj.com/content/368/bmj.m122) before each experiment.</li><li><strong>S8</strong> <span class="muted">(Sections 2.5 and 2.11)</span> Monthly review of the safety rule can miss transient qualifying 14-day periods. Evaluation frequency, handling of sparse reports, and restart criteria after a pause are unspecified.
+  <br><em>Requested change:</em> Specify a timely manual or automated evaluation schedule, minimum information needed for each trigger, and procedures for pausing and resuming collection or experiments.</li><li><strong>S9</strong> <span class="muted">(Sections 2.9.5, 2.9.10 and 2.11)</span> Early-stop analysis is a reasonable prespecified exception, but its relationship to the statements that decisions occur only at 6 and 12 months remains unclear.
+  <br><em>Requested change:</em> Identify early stopping explicitly as an exception. State whether an early analysis may assign confirmatory categories, and report stopping time and reason alongside its conclusions.</li><li><strong>S10</strong> <span class="muted">(Section 3.2)</span> Publishing estimates rather than records reduces disclosure, but these remain health-related estimates about a named individual. The stated privacy cost addresses interim noise without addressing identifiable disclosure or persistent public copies.
+  <br><em>Requested change:</em> Acknowledge this residual disclosure explicitly, including inference from successive releases and limits on withdrawing archived public results.</li></ol>
+<h4>Minor</h4>
+<ol class="points"><li><strong>m1</strong> <span class="muted">(Section 2.1; supplementary reporting checklist)</span> The claim of SPIRIT/SPENT completeness is difficult to audit without an item-to-section mapping.
+  <br><em>Requested change:</em> Provide completed applicable-item checklists, distinguish current observational requirements from future experiment amendments, and explain nonapplicable items, as recommended by [SPIRIT 2025](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004589).</li><li><strong>m2</strong> <span class="muted">(Sections 2.3.2 and 2.9.1)</span> Descriptions of mood dynamics can suggest that phi measures overall observed emotional inertia and sigma measures total daily variability.
+  <br><em>Requested change:</em> Clarify that phi concerns the residual latent daily process conditional on covariates, and sigma is its innovation standard deviation.</li><li><strong>m3</strong> <span class="muted">(Section 2.4, wearable evidence)</span> Evenson et al. reviewed Fitbit and Jawbone evidence available through July 2015, whereas the wording generalizes across wearables. The negative Ultrahuman search also lacks a reproducible query. See [Evenson et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC4683756/).
+  <br><em>Requested change:</em> Qualify the review&#39;s device and date scope, and provide the exact Ultrahuman search date, query, and manufacturer-associated records.</li></ol>
+<h4>Response</h4>
+<div class="response"><p>Thank you for a detailed and exacting review. Every point is answered
+below, with the section where the text changed. The software changes are
+in the round 2 snapshot and are covered by tests. One correction first:
+the round 1 instructions said that data collection had not started. That
+was true when they were written but not when the round began, because
+the first pilot report was made the same morning. The protocol now
+separates that pilot from confirmatory data collection (M1).</p>
+<p><strong>M1.</strong> Accepted. The protocol now distinguishes a
+pilot, from 19 September 2026 to the study start, from confirmatory data
+collection, which starts on the day after the protocol is finalized. The
+study start is recorded in the software, and reports made before it
+never enter any model: <code>load_dataset</code> filters by
+<code>users.study_start</code>, with a test (Administrative Information;
+Sections 2.11 and 2.12).</p>
+<p><strong>M2.</strong> Accepted. The timing rule now separates
+predictors in the strict sense (last night’s sleep and physiology, and
+the previous day’s behavior and indoor air) from same-day adjustment
+covariates. Weather is a summary of the whole day and the context flags
+are recorded in the evening; the text says why each is kept and that
+none is a confirmatory factor (Abstract; Sections 2.4 and 4.2).</p>
+<p><strong>M3.</strong> Accepted and fixed in the code.
+<code>syncWeather</code> now requests days up to yesterday in the
+participant’s time zone. The protocol says that weather uses local
+calendar days and the home location, even on days away from home
+(Section 2.4; Appendix A).</p>
+<p><strong>M4.</strong> Accepted. The claim is removed. Section 2.9.3
+now says that when skipping depends on mood, the selection depends on
+the outcome and can bias the associations as well as the average;
+sensitivity analysis (9) is a delta-adjusted imputation of unanswered
+prompts.</p>
+<p><strong>M5.</strong> Accepted and fixed. For work day, travel and
+sick, the probability comparison now predicts each report with the
+factor set to yes and to no, using the imputed values where the flag is
+missing (<code>summarize_fit</code>); a slow test checks that it agrees
+in direction with the odds ratio. Section 2.9.4 defines the
+contrast.</p>
+<p><strong>M6.</strong> Accepted. The gate is now enforced: a fit that
+fails the checks is not published (<code>scripts/cli.ts</code>), is
+flagged on the private dashboard, and is not used for any decision. A
+confirmatory fit that fails is rerun with longer chains and a higher
+target acceptance rate, and otherwise the hypotheses are reported as not
+assessable (Sections 2.9.5 and 2.9.8).</p>
+<p><strong>M7.</strong> Accepted and fixed. The evidence categories and
+the decision rule use the unrounded probability, and only the reported
+value is rounded, now to four decimals (<code>summarize_fit</code>;
+Sections 2.9.5 and 2.9.7).</p>
+<p><strong>M8.</strong> Accepted. <code>simulate_study</code> now
+returns the standard deviations of the generating values, and
+<code>simulate.R</code> computes the true odds ratios from them. The
+design analysis was rewritten: true effects are set per natural unit and
+converted in every replicate to the fitted scale, the standard deviation
+of the observed, lagged and recoded values (Section 2.6).</p>
+<p><strong>M9.</strong> Clarified, with a correction. The snapshot did
+contain <code>software/analysis/tests/testthat/</code>
+(<code>helper-setup.R</code>, <code>test-dataset.R</code>,
+<code>test-recovery.R</code>), and <code>test-recovery.R</code> asserts
+that a known effect is found with no divergent transitions. Your point
+about the description stands, because those tests are slow and run only
+on request; Section 2.9.8 now says exactly that. They now cover the day
+satisfaction model and the yes/no contrast as well.</p>
+<p><strong>M10.</strong> Accepted and fixed. The evening form now
+carries, for each field, the value it showed, and only the fields the
+participant changed are saved; a test covers an automatic value written
+after the form was opened. Section 2.7 states the rule, and that the
+later write wins when two sources write the same field, which is why
+each field has one source (Appendix A).</p>
+<p><strong>M11.</strong> Accepted and fixed; thank you for finding it. A
+request made with a device token now gets only an acknowledgment: for
+daily values, the date and the names of the fields changed; for a
+report, its id, study date and slot. Stored values are never returned,
+and a test checks that an existing note and other fields do not appear.
+Sections 2.7 and 3.2 describe the scope: a token can add reports and set
+daily values but cannot read stored data.</p>
+<p><strong>M12.</strong> Accepted and fixed. <code>publicResults</code>
+now builds every published object field by field, nested intervals,
+levels and dynamics included. The test adds unexpected nested fields (a
+note, a series, dates, an extra key) and checks that none of them is
+published.</p>
+<p><strong>M13.</strong> Accepted. Section 3.2 now lists every place the
+data are stored: the computer, the backups, the phone’s queue and cache,
+the services that record the raw data, Open-Meteo, and the public page.
+It also says what deletion in the application does and does not remove
+(backups, copies held by Apple, Ultrahuman and Amazon, the public
+history), and how a lost phone is handled.</p>
+<p><strong>M14.</strong> Accepted and implemented. Weekly adherence, for
+Monday to Sunday weeks with the eligible slots counted from the study
+start, is on the private Trends page, and the 14-day figure on the home
+page now counts only slots since the start. Sections 2.3.3 and 2.11
+define both and apply the 50% rule to completed weeks. Adherence is not
+on the public page; the 6- and 12-month reports will give it for every
+week.</p>
+<p><strong>M15.</strong> The study is a private self-study, conducted in
+Canada by an individual, not as part of work for any institution, with
+no funder or sponsor. Canada’s Tri-Council Policy Statement governs
+research under the auspices of eligible institutions and does not reach
+a private individual studying themselves, so no research ethics board
+has jurisdiction; the UBC policy you cite applies to UBC researchers.
+Section 3.1 now states this, commits to asking a research ethics board
+or the journal for its view before any results are submitted, and
+requires each experiment’s amendment to restate the assessment.</p>
+<p><strong>M16.</strong> Accepted. Roenneberg et al. (2003) is removed.
+The daily and weekly rhythms are now supported by Golder and Macy
+(2011), who measured expressed mood by time of day and day of the week
+across cultures (Section 2.4).</p>
+<p><strong>S1.</strong> Accepted and changed in the model. When social
+media time is modeled, screen time now enters as screen time other than
+social media, so each coefficient holds the other fixed. Section 2.9.4
+states that H3b concerns adding social media time, not replacing other
+screen time with it. A test covers the recoding.</p>
+<p><strong>S2.</strong> Accepted. Sensitivity analysis (7) is multiple
+imputation by chained equations with predictive mean matching, the
+factors of adjacent days as predictors and yes/no flags kept binary.
+Section 2.9.3 names the independence and binary limitations of the
+in-model imputation.</p>
+<p><strong>S3.</strong> Accepted. Sensitivity analyses (8), one report
+per slot, and (9), delta-adjusted informative nonresponse, are added,
+and the estimand is defined over reports (Section 2.9.4). Reminders are
+now push notifications sent by the app itself, and every reminder is
+recorded, so a report made within an hour after a reminder in its slot
+counts as answering it; the dashboard shows the share (Sections 2.3.1
+and 2.9.11).</p>
+<p><strong>S4.</strong> Accepted, and it changed the model. The design
+analysis now has correlated and autocorrelated factors, missingness as
+in the real study, effects on H3b and H4, a global null with φ = 0,
+Monte Carlo standard errors, the family-wise rate under the null, the
+number of fits that failed the checks, and a prespecified precision
+target (Section 2.6). Its first run, with the shared shrinkage prior,
+showed that pooling the five confirmatory factors with about 18 factors
+without effect shrank their estimates to roughly half of the truth, with
+poor coverage. The confirmatory factors now have their own normal(0,
+0.5) priors (model version ordinal-ar1-stan-v4; Section 2.9.2), the
+design analysis was run again on that model, and Section 2.6 reports
+both. It also showed that σ mixes slowly enough to miss the effective
+sample size threshold with 1,000 draws per chain, so production fits now
+use 2,000 (Section 2.9.8).</p>
+<p><strong>S5.</strong> Accepted. The prior predictive check was run and
+its results are in Section 2.9.2. Posterior checks of the agreement
+between reports on the same day and of lag-one autocorrelation, the
+response to a failed check, and K-fold cross-validation by whole weeks
+when Pareto k values are high are in Section 2.9.8.</p>
+<p><strong>S6.</strong> Accepted. Appendix A is a data dictionary with
+the source, time window, aggregation and unit of every factor, including
+the Canadian standard drink, caffeine conversions and the handling of
+travel. The evening form’s help texts now match it.</p>
+<p><strong>S7.</strong> Accepted. Section 2.10 lists the minimum content
+of each experiment’s amendment: the treatment estimand, adherence and
+deviations, periods and washout, carry-over and period effects,
+allocation concealment, adjustment for pretreatment factors only,
+publication before the start, and the mapping to SPENT 2019.</p>
+<p><strong>S8.</strong> Accepted and implemented. The app evaluates the
+safety rule every time its home page is opened, with a minimum of 10
+reports, and Section 2.11 specifies how a pause is recorded and
+ended.</p>
+<p><strong>S9.</strong> Accepted. An early stop is now an explicit
+exception: the rule is applied to the data available, and the report
+states when and why the study stopped (Sections 2.9.5 and 2.11).</p>
+<p><strong>S10.</strong> Accepted. Section 3.2 now acknowledges that the
+estimates are health-related information about a named person, that
+comparing successive updates can hint at recent mood, that the counts
+reveal when reports are made, and that the public history cannot be
+fully withdrawn.</p>
+<p><strong>m1.</strong> Accepted. Appendix B maps every SPIRIT 2025 item
+to a section, marks the items that do not apply, and assigns the SPENT
+2019 items to the experiments’ amendments.</p>
+<p><strong>m2.</strong> Accepted. Sections 2.3.2 and 2.9.1 now say that
+φ and σ describe the latent process conditional on the factors.</p>
+<p><strong>m3.</strong> Accepted. Evenson et al. is described as a
+review of Fitbit and Jawbone trackers covering studies up to 2015, and
+the PubMed search is given exactly: the query, the field, the date, the
+number of records and what the two relevant records are.</p>
+</div>
+</section><section class="card review" id="round-1-grok-4.6">
+<h3>Grok 4.6: Revise</h3>
+<p class="small muted">xAI Grok 4.6 through the Grok command line tool (grok 1.0.30 (04b7ffed98c6) [stable]), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> This is a careful N-of-1 protocol: ordinal AR(1) model, lagged factors, decision rule, privacy design, and software that mostly matches the text. It is not yet final. Three errors block acceptance. The status line says data collection has started, which is false for this review draft and would make later revisions non-prospective. H3 is not the parameter the model fits, because total screen time and social media time enter together. The claim that every factor uses only information known before the reports is false for same-day weather and evening-logged context. Fix those, then the remaining SPIRIT gaps, connector specifications, and design-analysis mismatches are ordinary revisions.</p>
+
+<h4>Must fix</h4>
+<ol class="points"><li><strong>M1</strong> <span class="muted">(Administrative Information (Status); 1.1; 4.1)</span> The header says data collection started on 19 September 2026, on a version labeled draft for review (round 1). Collection has not started. If collection did start during review, the claim that outcomes, hypotheses, and the model are fixed before study data exist would no longer hold for any revision prompted by this round.
+  <br><em>Requested change:</em> State that confirmatory data collection starts only after this version is accepted. If any reports already exist, label them as pilot, exclude them from the 6-month and 12-month confirmatory analyses, and give their dates and counts.</li><li><strong>M2</strong> <span class="muted">(1.3 H3; 2.9.5; software/analysis/mood.R PREDICTORS)</span> H3a is said to concern screen time other than social media, and H3b more social media time. The fitted predictors are total screen_time_min and social_media_min. Holding total screen time fixed, the social media coefficient is substitution of social media for other screen time, not the effect of more social media. If social media is dropped under the 50% or 10-day rule, H3a silently becomes total screen time.
+  <br><em>Requested change:</em> When both are observed, enter non-social-media minutes (screen time minus social media) and social media minutes as the two predictors, and judge H3a and H3b on those coefficients. When social media is out of the model, judge H3a on total screen time and report H3b as not testable. State this recoding in 2.9.5 and implement it in mood.R.</li><li><strong>M3</strong> <span class="muted">(Abstract; 2.4 timing rule; 4.1)</span> The protocol repeats that factors enter only with information available before the reports they predict. Same-day mean temperature, precipitation, sunshine, and outdoor PM2.5 are completed after morning and afternoon reports. Work, travel, and sick are evening-log flags, so they can use information from after earlier slots and can be consequences of that day&#39;s mood.
+  <br><em>Requested change:</em> Limit the pre-report claim to overnight physiology and lagged behavior. For weather, either lag it or use a forecast known at the start of the day, or call completed-day weather an explicit exception and say morning reports are modeled with rainfall and air quality from later that day. For the context flags, say they are evening-recorded same-day covariates, not pre-report predictors.</li></ol>
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S1</strong> <span class="muted">(Administrative Information; 2.2; 3.1; SPIRIT 2025 items 3a, 4, 11, 13)</span> Items that apply are missing: investigator affiliation; country and ordinary setting; SPIRIT 2025 item 11 (patient and public involvement), which requires a statement even when there is none; no intended registry, only a website; no filled SPIRIT 2025 and SPENT 2019 checklist marking N/A items.
+  <br><em>Requested change:</em> Add affiliation and country. State that there is no separate public involvement because the participant is the investigator. Name an intended registry (OSF is enough if a trial registry will not take an observational N-of-1) or justify none. Attach a filled SPIRIT 2025 plus SPENT 2019 checklist.</li><li><strong>S2</strong> <span class="muted">(2.6; software/analysis/design.R and simulate.R)</span> The protocol says 50 studies of 180 days and 50 of 365 days; design.R defaults to 40. True effects are sleep, steps, screen time, work day, and temperature; H3b and H4 are simulated as nulls with complete data. Optional confirmatory factors will not be complete in the real study. The summary is per factor, not the chance that at least one of the six confirmatory tests is supported under a global null.
+  <br><em>Requested change:</em> Set the default (or the command you will run) to 50 and 50. Put signed effects on the confirmatory factors, including H3b and H4. Simulate screen time, social media, and social time with missingness like the evening log. Report, for 180 and 365 days, how often each hypothesis is supported and how often at least one confirmatory test is supported when all confirmatory effects are zero.</li><li><strong>S3</strong> <span class="muted">(2.4 Ultrahuman Partner API and Amazon monitor (specification))</span> The connectors are specified too thinly to implement or audit. Ultrahuman: resources, HRV statistic, mapping of a sleep session onto the 4 AM study date, and disagreement with Apple Health are unspecified. Amazon: unofficial methods, token scopes, VOC units, whether the daily mean uses the study day or the calendar day, and the 12-hour rule when the computer is asleep at night (so night air is systematically missing) are unspecified.
+  <br><em>Requested change:</em> Add a short specification for each connector covering those points, including that a night-biased indoor mean is not a 24-hour mean, and that switching a factor from Apple Health to the Partner API is an amendment modeled as a break.</li><li><strong>S4</strong> <span class="muted">(2.9.6; software/analysis/)</span> Day satisfaction is a secondary objective with a full model in prose, but no Stan program, and the text postpones implementation until before the 6-month analysis. That leaves the secondary model tunable after observational data exist.
+  <br><em>Requested change:</em> Add and lock the secondary model in the software now, with the same versioning as ordinal-ar1-stan-v3, and say that any later change is an amendment. State how missing evening ratings are handled (days without a rating dropped, not imputed).</li><li><strong>S5</strong> <span class="muted">(2.3.1; 2.9.1; 2.9.4)</span> Extra reports in a slot are kept and treated as independent given the day effect. Days with more reports pull the factor coefficients more. That is a report-level estimand, not a day-level one, and it interacts with skipping prompts in bad moods.
+  <br><em>Requested change:</em> State that the estimand is report-level (days with more taps get more weight), or keep one report per slot (first, or random). If extras are kept, say so in 2.9.4.</li><li><strong>S6</strong> <span class="muted">(1.3 H3 and H4; 2.4; 2.9.3)</span> H3 and H4 depend on optional evening entries. Under the 50% and 10-day rule they can be not testable at 6 or 12 months. The design analysis fills those fields every day, so it overstates power.
+  <br><em>Requested change:</em> Make screen time, social media time, and in-person social time required evening fields, or give a completeness target and the date at which a still-sparse confirmatory factor is declared not testable.</li><li><strong>S7</strong> <span class="muted">(2.4 citations)</span> Roenneberg et al. (2003) is about chronotype and sleep timing, not mood by time of day or weekday. Power et al. (2015) links past PM2.5 to prevalent anxiety in a cohort, not momentary mood. Neither supports the attached sentence as written.
+  <br><em>Requested change:</em> Cite evidence on diurnal or weekly mood variation for the time-of-day and weekday effects, and cite work on short-term pollution and affect (or describe Power as background on PM2.5 and anxiety, not as evidence for this outcome).</li><li><strong>S8</strong> <span class="muted">(2.9.7; 2.9.10; 3.2; software/server/maintenance.ts publicResults; routes.ts homepage headline)</span> The confirmatory rule is said to run only at 6 and 12 months, but every successful refit publishes direction and evidence labels at the same 0.975, 0.90, and 0.75 cuts, and the private home page highlights strong and moderate effects from the first eligible fit.
+  <br><em>Requested change:</em> Do not publish strong or moderate labels for confirmatory factors before the 12-month analysis (or show them only at the 6-month interim, marked as interim). Keep numerical intervals and p_positive if you want live estimates.</li><li><strong>S9</strong> <span class="muted">(2.9.3)</span> Remaining gaps are imputed as independent N(0, 1) draws. A night without the ring makes sleep, efficiency, HRV, resting heart rate, and skin temperature missing together. Independent draws invent impossible combinations and ignore a single missingness event.
+  <br><em>Requested change:</em> Impute overnight metrics jointly, or add a worn-or-not indicator and skip independent imputation for that block. Keep the planned check that device missingness depends on mood.</li><li><strong>S10</strong> <span class="muted">(2.9.9)</span> Sensitivity (4) is already an exploratory analysis. Sensitivity (7) does not name the metric model. Sensitivity (3) does not say whether a day is dropped if any confirmatory factor is missing or only if that factor is missing.
+  <br><em>Requested change:</em> Define the metric model (same linear predictor, numeric 1, 2, 3). Define complete-case as dropping a report&#39;s day when that confirmatory factor is missing, and say whether other factors may still be imputed. Drop same-day behavior from the confirmatory sensitivity list or mark it as exploratory only.</li><li><strong>S11</strong> <span class="muted">(1.2 last sentence; 3.3; software/README.md License)</span> The study is said to provide open software, but 3.3 says the code can be shared on request. The software is GPL-3.0.
+  <br><em>Requested change:</em> Say whether the repository is public, name the license, and drop &#39;on request&#39; if the code will be public.</li><li><strong>S12</strong> <span class="muted">(2.10; 4.2)</span> Embedded experiments cannot be blinded: the participant is the investigator, knows the hypotheses, and sees live estimates. SPENT items on sequence, allocation concealment, periods, and washout are deferred to later amendments, which is acceptable only if stated.
+  <br><em>Requested change:</em> State that experiments are unblinded self-experiments. Say that SPENT 2019 items for periods, sequence, concealment, and washout will be in each experiment&#39;s amendment, and that version 3.0 only fixes the observational phase plus this template.</li><li><strong>S13</strong> <span class="muted">(2.4 weather; software/server/maintenance.ts syncWeather)</span> Weather is described as complete days, but the cutoff is UTC yesterday, which can still be the local study day. Weather is also always for the configured home coordinates, including travel days, which the protocol does not say.
+  <br><em>Requested change:</em> Define a complete day in the participant&#39;s time zone. State that Open-Meteo values are for the fixed home location even when the travel flag is set.</li></ol>
+<h4>Minor</h4>
+<ol class="points"><li><strong>m1</strong> <span class="muted">(2.3.1)</span> The delay between report and receipt is not a stored field; recorded_at and created_at are stored and the delay can be computed.
+  <br><em>Requested change:</em> Say that both timestamps are stored so the delay can be computed for the two-hour sensitivity analysis.</li><li><strong>m2</strong> <span class="muted">(2.8; software/server/maintenance.ts)</span> Backups run when 20 hours have passed during the hourly job, and only if BACKUP_GPG_RECIPIENT is set, not once each calendar day by default.
+  <br><em>Requested change:</em> Say an encrypted snapshot is taken when the hourly job finds that about a day has passed since the last one, after a GPG recipient is configured, and that the last 30 files are kept.</li><li><strong>m3</strong> <span class="muted">(2.9.3; software/analysis/mood.R)</span> The code also drops a factor that never varies on rated days. The protocol does not mention that rule.
+  <br><em>Requested change:</em> Add zero variance as a reason a factor is left out and shown under dropped.</li><li><strong>m4</strong> <span class="muted">(2.3.3; software/server/stats.ts)</span> Adherence is defined as the weekly share of slots with a report, but the app shows a 14-day overall completion rate, and public results do not include adherence.
+  <br><em>Requested change:</em> Either compute and display weekly slot adherence, or define adherence as the 14-day rate the dashboard already shows.</li><li><strong>m5</strong> <span class="muted">(Revision History version 3.0 versus 2.4 last paragraph)</span> The revision history presents Partner API collection and indoor air as completed in 3.0, while 2.4 says those connectors are still being added.
+  <br><em>Requested change:</em> In the revision history, mark those items as specified and in progress, not completed.</li><li><strong>m6</strong> <span class="muted">(2.3.2; Kuppens et al., 2010)</span> Kuppens et al. (2010) study moment-to-moment emotional inertia. Daily phi is related but not the same index.
+  <br><em>Requested change:</em> Call phi day-to-day carry-over, and say it is analogous to, not identical with, emotional inertia as in Kuppens et al.</li><li><strong>m7</strong> <span class="muted">(2.9.8)</span> Bulk ESS is checked on cutpoints, time of day, weekday, phi, sigma, tau, and beta, not on the day effects or imputed cells. The text says every reported parameter.
+  <br><em>Requested change:</em> Name the parameters that must pass the ESS and R-hat rule, matching summarize_fit in mood.R.</li><li><strong>m8</strong> <span class="muted">(2.7; 3.2; software/README.md)</span> Tailscale HTTPS certificates put the machine name in public Certificate Transparency logs. The protocol does not mention that.
+  <br><em>Requested change:</em> Note that the Tailscale hostname can appear in public CT logs, as the README already does.</li></ol>
+<h4>Response</h4>
+<div class="response"><p>Thank you for a clear and practical review. Every point is answered
+below, with the section where the text changed. The software changes are
+in the round 2 snapshot and are covered by tests. One correction first:
+the round 1 instructions said that data collection had not started. That
+was true when they were written but not when the round began, because
+the first pilot report was made the same morning. Your M1 is resolved as
+you proposed.</p>
+<p><strong>M1.</strong> Accepted as proposed. Reports made before the
+protocol is finalized are pilot data: the pilot runs from 19 September
+2026 to the study start, which is the day after finalization. The study
+start is recorded in the software, and pilot reports never enter any
+model, confirmatory or live (<code>load_dataset</code> filters by
+<code>users.study_start</code>, with a test). The 6- and 12-month
+analyses count from the study start (Administrative Information;
+Sections 2.11 and 2.12).</p>
+<p><strong>M2.</strong> Accepted and implemented as proposed. When
+social media time is modeled, screen time enters as screen time other
+than social media, so H3a and H3b are judged on those two coefficients,
+each with the other held fixed. When social media time is left out,
+screen time enters as its total, H3a is judged on it, and H3b is not
+testable (Sections 1.3, 2.9.4 and 2.9.5; <code>build_factors</code> in
+<code>mood.R</code>, with a test).</p>
+<p><strong>M3.</strong> Accepted. The timing rule now limits the
+pre-report claim to last night’s sleep and physiology and the previous
+day’s behavior and indoor air. Same-day weather is named as an explicit
+exception, including that a morning report is modeled with the
+afternoon’s rain, and the work, travel and sick flags are described as
+evening-recorded same-day covariates that can follow the day’s mood.
+Both groups are adjustment covariates, and neither is a confirmatory
+factor (Abstract; Sections 2.4 and 4.2).</p>
+<p><strong>S1.</strong> Accepted. The protocol now gives the country and
+states that the study is conducted privately, outside any institution
+(Administrative Information; Section 2.2). Section 2.2 has the patient
+and public involvement statement. The Administrative Information and
+Section 3.3 give the reason there is no registry: every version is
+published with its hash on a public site whose commit history dates it.
+Appendix B maps every SPIRIT 2025 item to a section and marks the items
+that do not apply.</p>
+<p><strong>S2.</strong> Accepted, and it changed the model. The design
+analysis now runs replicates for each of four conditions (180 and 365
+days, with effects and under the null); 50 is the script’s default, and
+Section 2.6 gives the number completed. It places signed effects on
+every confirmatory factor, H3b and H4 included, and removes the optional
+factors on 30% of evenings. It reports how often each hypothesis is
+supported and how often at least one of the six tests is supported under
+the global null. Its first run, with the shared shrinkage prior, showed
+that pooling the confirmatory factors with about 18 factors without
+effect shrank their estimates to roughly half of the truth. The
+confirmatory factors now have their own normal(0, 0.5) priors (model
+version ordinal-ar1-stan-v4; Section 2.9.2), and the design analysis was
+run again on that model; Section 2.6 reports both runs.</p>
+<p><strong>S3.</strong> Accepted. Appendix A and the connector paragraph
+now specify the Ultrahuman endpoint, the HRV statistic, the date
+convention for sleep, the Apple Health alternatives and the one-source
+rule. For Amazon they cover the unofficial method, what its token can
+do, the units (VOC as the monitor’s unitless index), calendar-day means
+and the waking-hours bias. Switching a factor to the Partner API after
+the start is an amendment modeled as a break (Section 2.4).</p>
+<p><strong>S4.</strong> Accepted and implemented. The day satisfaction
+model is now in the software:
+<code>analysis/day_satisfaction.stan</code> and
+<code>analysis/secondary.R</code>, model version day-ordinal-ar1-stan-v2
+(with the prior change described under S2), tested on simulated data.
+Any change to it is an amendment. Days without an evening rating are
+left out, not imputed (Section 2.9.6).</p>
+<p><strong>S5.</strong> Accepted. The estimand is defined over reports,
+so days with more reports weigh more (Sections 2.3.1 and 2.9.4), and
+sensitivity analysis (8) keeps only the first report in each slot.</p>
+<p><strong>S6.</strong> Partly accepted. The participant asked for
+automatic collection wherever possible, so these entries stay optional
+rather than required. The protocol states the aim to complete them every
+evening and notes that Screen Time allows a missed evening to be filled
+in within the week. It also keeps the not-testable rule, and the design
+analysis now simulates 30% of evenings missing, so that its estimates of
+power include this cost (Sections 2.4, 2.6 and 2.9.5).</p>
+<p><strong>S7.</strong> Accepted. Roenneberg et al. is replaced by
+Golder and Macy (2011), who measured expressed mood by time of day and
+day of the week. Power et al. is now presented as background linking
+PM2.5 with anxiety, not as evidence about momentary mood (Section
+2.4).</p>
+<p><strong>S8.</strong> Accepted and implemented. The published page no
+longer carries an evidence label for the five confirmatory factors: it
+shows “judged at 6 and 12 months” and keeps the intervals and
+probabilities. The home page summary leaves them out (Section 2.9.10;
+<code>publicResults</code>, with a test).</p>
+<p><strong>S9.</strong> Accepted. Section 2.9.3 now names the overnight
+block that goes missing together, and sensitivity analysis (7) imputes
+by chained equations, in which each missing factor is predicted from the
+others and from adjacent days, so the block is imputed with its
+correlations. Checking device missingness against mood remains
+planned.</p>
+<p><strong>S10.</strong> Accepted. The complete-case analysis is defined
+per confirmatory factor: reports on days where that factor is missing
+are left out, and the other factors are imputed as usual. The metric
+model is defined as the ratings 1, 2 and 3 as a normal outcome with the
+same linear predictor and AR(1) day effect. Same-day behavior is removed
+from the sensitivity list and remains exploratory (Sections 2.9.7 and
+2.9.9).</p>
+<p><strong>S11.</strong> Accepted. The repository will be public under
+the GNU General Public License 3.0 when the protocol is finalized.
+Section 3.3 gives the license and the address, and “on request” is
+gone.</p>
+<p><strong>S12.</strong> Accepted. Section 2.10 now states that the
+experiments are unblinded self-experiments, that version 3.0 fixes the
+observational phase and the template for experiment amendments, and that
+each amendment will cover the SPENT 2019 items for periods, sequence,
+concealment and washout.</p>
+<p><strong>S13.</strong> Accepted and fixed. Weather now uses complete
+days in the participant’s time zone (<code>syncWeather</code>), and the
+protocol states that it is for the home location even on days away from
+home (Section 2.4; Appendix A).</p>
+<p><strong>m1.</strong> Accepted. Section 2.3.1 now says that both
+timestamps are stored, so the delay can be computed.</p>
+<p><strong>m2.</strong> Accepted. Section 2.8 now describes the backup
+rule as implemented.</p>
+<p><strong>m3.</strong> Accepted. Section 2.9.3 now names a factor that
+never varies as a reason for leaving it out.</p>
+<p><strong>m4.</strong> Accepted and implemented. Weekly adherence is
+computed and shown on the private Trends page, with the eligible slots
+counted from the study start (Section 2.3.3).</p>
+<p><strong>m5.</strong> Both connectors are now implemented, so the
+revision history lists them as part of version 3.0. Section 2.4 states
+that they are tested with synthetic responses shaped like the services’
+formats. The Amazon connector has since been checked against the live
+service; the Ultrahuman connector will be checked when the Partner API
+token is granted.</p>
+<p><strong>m6.</strong> Accepted. φ is now called day-to-day carry-over
+of the latent mood, analogous to but not the same as the emotional
+inertia of Kuppens et al. (Section 2.3.2).</p>
+<p><strong>m7.</strong> Accepted. Section 2.9.8 names the parameters
+that must pass the R-hat and effective sample size checks, matching
+<code>summarize_fit</code>.</p>
+<p><strong>m8.</strong> Accepted. Section 2.7 notes that the Tailscale
+certificate publishes the computer’s name in public certificate
+transparency logs.</p>
+</div>
+</section><h2 id="round-2">Round 2</h2>
+<section class="card review" id="round-2-gpt-6-astra">
+<h3>GPT-6-Astra: Revise</h3>
+<p class="small muted">OpenAI GPT-6-Astra through the Codex command line tool (codex-cli 0.155.1), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> Most prior concerns are resolved, and reported design-analysis results agree with supplied CSVs. Remaining privacy and adherence discrepancies, plus new pilot-exclusion, migration, date-assignment, and predictive-check inconsistencies, prevent finalization. Review used source inspection and in-memory probes; R tests and new Stan fits could not run in the read-only environment.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>Corrected context distinguishes the September 19 pilot from collection after finalization. The new implementation defect is addressed separately in M20.</td></tr><tr><td>M2</td><td>Resolved</td><td>Whole-day weather and evening context are explicitly identified as contemporaneous adjustment exceptions.</td></tr><tr><td>M3</td><td>Resolved</td><td>Weather now stops at yesterday in the participant&#39;s time zone; calendar-day aggregation is specified.</td></tr><tr><td>M4</td><td>Resolved</td><td>Outcome-dependent nonresponse is correctly acknowledged as capable of biasing associations and average mood.</td></tr><tr><td>M5</td><td>Resolved</td><td>Binary comparisons explicitly set each report&#39;s flag to 1 and 0, replacing its observed or imputed contribution.</td></tr><tr><td>M6</td><td>Resolved</td><td>Publication is gated by convergence; flagged private display is explicitly permitted, and confirmatory remediation is specified.</td></tr><tr><td>M7</td><td>Resolved</td><td>Evidence classification uses unrounded probabilities; rounding occurs only for reported values.</td></tr><tr><td>M8</td><td>Resolved</td><td>Generating and fitted scales are now distinguished. The corrected design analysis generates from rounded covariates and converts truth using each replicate&#39;s fitted standard deviations.</td></tr><tr><td>M9</td><td>Resolved</td><td>The supplied snapshot contains opt-in recovery assertions for both models, accurately described in Section 2.9.8.</td></tr><tr><td>M10</td><td>Resolved</td><td>The form saves edited fields only, preserving intervening automatic updates; conflicting writes now have an explicit rule.</td></tr><tr><td>M11</td><td>Resolved</td><td>Device POST responses return acknowledgments without stored values, including duplicate report submissions.</td></tr><tr><td>M12</td><td>Resolved</td><td>Nested intervals, levels, and dynamics are explicitly constructed, with tests for unexpected nested fields.</td></tr><tr><td>M13</td><td>Partly resolved</td><td>Storage boundaries are substantially corrected. Section 3.2 still misstates backup retention as 30 elapsed days instead of the latest 30 successful snapshots by default, and push-service visibility as timing only rather than delivery and application-identification metadata. Correct both claims; see maintenance.ts:207, push.ts:71, and [RFC 8292](https://www.rfc-editor.org/rfc/rfc8292.html).</td></tr><tr><td>M14</td><td>Partly resolved</td><td>Weekly reporting exists, but stats.ts:30 and :46 still count future slots today. One first-morning report yields 1/3 instead of 1/1. Count only begun slots in both denominators.</td></tr><tr><td>M15</td><td>Resolved</td><td>The clarified private Canadian setting provides a sound nonapplicability rationale for institutional TCPS review, with reassessment before experiments. See [TCPS scope](https://ethics.gc.ca/eng/policy-politique_interpretations_scope-portee.html).</td></tr><tr><td>M16</td><td>Resolved</td><td>[Golder and Macy](https://pubmed.ncbi.nlm.nih.gov/21960633/) supports the revised statement about daily and weekly expressed-mood rhythms.</td></tr><tr><td>S1</td><td>Resolved</td><td>Other screen time replaces total screen time when social media is modeled, and the addition estimand is explicit.</td></tr><tr><td>S2</td><td>Resolved</td><td>Independent-imputation limitations are acknowledged; type-appropriate, temporally informed multiple imputation is prespecified as a sensitivity analysis.</td></tr><tr><td>S3</td><td>Resolved</td><td>The revision adds one-report-per-slot and informative-nonresponse sensitivities, plus an operational reminder-response classification.</td></tr><tr><td>S4</td><td>Resolved</td><td>Expanded simulations, a precision target, Monte Carlo uncertainty, family-level results, and failed-fit counts are supplied. Short-chain and unsimulated-remediation limitations are explicit.</td></tr><tr><td>S5</td><td>Partly resolved</td><td>Prior prediction, dependence checks, and PSIS remediation are added. Threshold-specific association checks remain unspecified; add a check of proportional-odds adequacy.</td></tr><tr><td>S6</td><td>Partly resolved</td><td>The dictionary substantially improves measurement rules, but overlapping Apple Health samples, monitor placement, and the Ultrahuman HRV metric still need explicit definitions.</td></tr><tr><td>S7</td><td>Resolved</td><td>Prospective amendment requirements now cover estimands, adherence, deviations, periods, concealment, carryover, pretreatment adjustment, and reporting guidance.</td></tr><tr><td>S8</td><td>Partly resolved</td><td>Information thresholds and pause procedures are specified. Safety checks run only at /, while routine reminders open /rate/; specify a minimum evaluation frequency or check the reporting route.</td></tr><tr><td>S9</td><td>Resolved</td><td>Early stopping explicitly permits confirmatory classification and requires reporting the stopping date and reason.</td></tr><tr><td>S10</td><td>Resolved</td><td>Identifiable health disclosure, inference across updates, and limits on withdrawing public history are acknowledged.</td></tr><tr><td>m1</td><td>Resolved</td><td>Appendix B provides the requested item mapping and separates observational requirements from future experiment amendments.</td></tr><tr><td>m2</td><td>Resolved</td><td>The text identifies the conditional latent process and distinguishes innovation variability from observed mood variability.</td></tr><tr><td>m3</td><td>Resolved</td><td>Device scope and search details are supplied, and relevant manufacturer-associated papers are identified. The exact 33-record count was not independently reproduced.</td></tr>
+</tbody></table></div>
+<h4>Must fix</h4>
+<ol class="points"><li><strong>M20</strong> <span class="muted">(Sections 2.11 and 2.12; software/analysis/mood.R:68; software/server/analysis.ts:56)</span> An unset study_start defaults to 0000-01-01, permitting pilot observations in primary, secondary, and tag models. Changing study_start also leaves the analysis fingerprint unchanged, so existing fits can remain available for publication under an obsolete cutoff.
+  <br><em>Requested change:</em> Require a configured study start before any modeling. Include it in fit provenance and invalidation, and prevent use or publication of fits based on an obsolete cutoff. Test unset and changed start dates.</li><li><strong>M21</strong> <span class="muted">(software/server/schema.sql:10; software/server/db.ts:13; software/server/auth.ts)</span> The new users.study_start column has no migration. CREATE TABLE IF NOT EXISTS leaves an existing users table unchanged, while authentication now selects that column. An in-memory upgrade probe produced &#39;no such column: study_start&#39;.
+  <br><em>Requested change:</em> Add an idempotent migration for users.study_start and test upgrading a database with the previous users schema.</li><li><strong>M22</strong> <span class="muted">(Appendix A; software/server/sources.ts:83)</span> When Ultrahuman omits the requested date, the connector substitutes the first returned date&#39;s metrics and stores them under the requested date. A synthetic September 19 request with only September 18 data was saved as September 19, contradicting the promised date alignment.
+  <br><em>Requested change:</em> Skip responses without the requested date, or store returned records under their actual dates. Determine finished-day eligibility from the stored date and test mismatched-date responses.</li><li><strong>M23</strong> <span class="muted">(Section 2.9.8; software/analysis/mood.R:337; software/server/pages.ts:360)</span> The new per-fit predictive-check failure rule uses a central 95% interval, but current summaries export only 5th and 95th percentiles, a central 90% interval. No separate 95% bounds or failure assessment are supplied.
+  <br><em>Requested change:</em> Provide the specified 95% bounds and failure reporting, or explicitly describe a separate planned assessment and distinguish it from the current 90% dashboard display.</li></ol>
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S20</strong> <span class="muted">(software/analysis/tests/testthat/test-recovery.R:28)</span> The new binary-contrast test checks direction agreement only. The previous erroneous x + 1 comparison would also pass, so this test does not protect the correction.
+  <br><em>Requested change:</em> Add a deterministic numerical comparison with explicit predictions at 1 and 0, including observed and missing flags. This need not run Stan.</li></ol>
+
+<h4>Response</h4>
+<div class="response"><p>Thank you for checking the revision so closely, code included. The
+four new points and the five partly resolved ones are answered below;
+each software change comes with a test. Separately, the prior scale of
+the confirmatory factors is now passed to both Stan models as data, so
+that sensitivity analysis (1) needs no change to the model code. At the
+default of 0.5 the model is the same, so its version stays
+ordinal-ar1-stan-v4 (Section 2.9.9).</p>
+<p><strong>M13.</strong> Accepted; both statements were wrong. Section
+3.2 now says that the 30 most recent backups are kept, so a backup is
+removed once 30 newer ones exist, about a month of daily backups. It
+also says that Apple’s push service cannot read the encrypted reminders
+but learns when each one is sent, its size and the device it goes to,
+and identifies the sending server by its public key and contact address,
+the address of the study’s code repository (RFC 8292).</p>
+<p><strong>M14.</strong> Accepted and fixed. Both the 14-day completion
+and weekly adherence now count only slots that have begun, so a single
+report in the first morning slot is 1 of 1, not 1 of 3
+(<code>begunSlots</code> in <code>stats.ts</code>). The test starts a
+study today and checks that the eligible slots equal the slots begun so
+far, and that both measures agree. Section 2.3.3 already defined
+adherence this way; the code now matches it.</p>
+<p><strong>S5.</strong> Accepted. Section 2.9.8 now specifies the check
+at 6 and 12 months. Each confirmatory factor gets a refit with separate
+coefficients for its two thresholds (Sad against Meh or Happy, and Sad
+or Meh against Happy). The assumption fails for that factor if the 95%
+interval of the difference between the two coefficients excludes zero. A
+factor that fails is reported with both coefficients next to its
+confirmatory result, and the decision rule is unchanged.</p>
+<p><strong>S6.</strong> Accepted.</p>
+<ul>
+<li><strong>Apple Health.</strong> The values use the samples of one
+source only, selected by source in the phone automation: the Ultrahuman
+app for sleep, heart rate variability, resting heart rate and steps, and
+the Apple Watch for exercise minutes and time in daylight. Samples
+another device records for the same period are never added. The pilot
+checks that the Ultrahuman app’s asleep samples do not overlap one
+another. The README’s recipe now includes the filter.</li>
+<li><strong>Monitor placement.</strong> The monitor stays where it is at
+the study start, a place recorded in the pilot notes, and a move is a
+dated note.</li>
+<li><strong>HRV.</strong> The factor is the nightly average that the
+Partner API returns (<code>hrv.avg</code>). Ultrahuman states that its
+ring uses RMSSD in its sleep and recovery scores but does not publish
+how this value is computed. The factor is therefore the device’s value
+and is never combined with another device’s. Apple Health stores ring
+values under its SDNN type whatever the statistic (Appendix A).</li>
+</ul>
+<p><strong>S8.</strong> Accepted and implemented. The rating page that
+reminders open now evaluates the safety rule and shows the same notice
+as the home page, so the rule is checked at every report made in the app
+(Section 2.11; <code>ratePage</code>).</p>
+<p><strong>M20.</strong> Accepted and fixed.</p>
+<ul>
+<li><strong>Unset start.</strong> <code>study_start()</code> now stops
+every model, primary, secondary and tag comparisons alike, while the
+study start is unset; the run is recorded as waiting with that
+reason.</li>
+<li><strong>Record of the start used.</strong> Each fit records the
+study start it used (<code>data.study_start</code>), and the start is
+part of the fingerprint, so changing it triggers a refit.</li>
+<li><strong>Older fits.</strong> A fit whose recorded start differs from
+the current one is flagged on the dashboard, and
+<code>publishable()</code> refuses it. The same gate applies to the
+hourly job and to the manual publish command.</li>
+<li><strong>Tests.</strong> An R test covers the unset start (no
+dataset, day dataset or tag comparison). A Node test checks that a
+changed start changes the fingerprint and blocks publishing the older
+fit (Sections 2.9.8, 2.11 and 2.12).</li>
+</ul>
+<p><strong>M21.</strong> Accepted and fixed; thank you for the upgrade
+probe. <code>users.study_start</code> is now in the migration list,
+which is exported as <code>migrate()</code>. A test builds a database
+with the previous users table, runs the migration twice and checks the
+added columns and their defaults.</p>
+<p><strong>M22.</strong> Accepted and fixed. The connector files values
+only under the requested date and only when the answer contains that
+date; otherwise it stores nothing and reports the date as missing. A
+test stubs the service to answer today’s request with yesterday’s
+metrics and checks that nothing is stored (Appendix A).</p>
+<p><strong>M23.</strong> Accepted and fixed. The check now uses the
+2.5th and 97.5th percentiles of the replicated shares and records, per
+category, whether the observed share lies outside them, using unrounded
+values. The dashboard marks each failed share, describes the interval as
+the central 95%, and counts the failures among the diagnostics (Section
+2.9.8).</p>
+<p><strong>S20.</strong> Accepted. The yes/no comparison is now a
+separate function, <code>contrast()</code>, and a test without Stan
+checks it numerically. It uses two draws and three reports whose flag is
+observed as yes, observed as no and missing. The test checks that every
+report’s linear predictor is set exactly to the flag’s yes and no
+values, which the earlier value-plus-one comparison would fail, and that
+a continuous factor moves one unit up from each report’s own value.</p>
+</div>
+</section><section class="card review" id="round-2-grok-4.6">
+<h3>Grok 4.6: Accept</h3>
+<p class="small muted">xAI Grok 4.6 through the Grok command line tool (grok 1.0.30 (04b7ffed98c6) [stable]), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> The three blocking errors are fixed. Pilot reports are excluded from every model once the study start is set; H3 is judged on other screen time and social media time held fixed; and the pre-report claim is limited to last night&#39;s sleep and physiology and the previous day&#39;s behavior, with same-day weather and evening context named as adjustment covariates. The design analysis, secondary day-satisfaction model, and connector specifications match the revised text. I am satisfied the protocol can be finalized. Remaining items are ordinary: the primary model still imputes the overnight block independently; the confirmatory prior scale is hardcoded, so sensitivity (1) cannot vary it without editing Stan; and an unset study start still lets every report into a fit.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>Pilot and confirmatory collection are separated. load_dataset filters on users.study_start, with a test, and 6- and 12-month analyses count from that date.</td></tr><tr><td>M2</td><td>Resolved</td><td>When social media time is modeled, screen time is recoded to other screen time. If social media time is dropped, H3a is judged on total screen time and H3b is not testable. Implemented in build_factors with a test.</td></tr><tr><td>M3</td><td>Resolved</td><td>The pre-report claim is limited to overnight physiology and lagged behavior. Same-day weather and the work, travel, and sick flags are named as adjustment covariates, not confirmatory factors.</td></tr><tr><td>S1</td><td>Resolved</td><td>Country and private setting, a patient and public involvement statement, a dated public record in place of a registry, and a SPIRIT 2025 map in Appendix B are in. SPENT items for experiments stay with the amendments, as in S12.</td></tr><tr><td>S2</td><td>Resolved</td><td>Signed effects on every confirmatory factor, 30% evening missingness, and the family-wise support rate are in. They ran 40 studies at 12 months rather than 50, for cost, which is a sound reason.</td></tr><tr><td>S3</td><td>Resolved</td><td>Appendix A and Section 2.4 specify the Ultrahuman endpoint and date rule, Apple Health alternatives, the unofficial Amazon method and token, VOC as an index, calendar-day indoor means, waking-hour bias, and a Partner API switch as an amendment.</td></tr><tr><td>S4</td><td>Resolved</td><td>day_satisfaction.stan and secondary.R lock model version day-ordinal-ar1-stan-v2. Days without an evening rating are left out. A change is an amendment.</td></tr><tr><td>S5</td><td>Resolved</td><td>The estimand is report-level. Sensitivity (8) keeps the first report in each slot.</td></tr><tr><td>S6</td><td>Resolved</td><td>They declined required evening fields, kept the not-testable rule, stated the aim to complete H3 and H4 every evening, and put 30% evening missingness in the design analysis.</td></tr><tr><td>S7</td><td>Resolved</td><td>Golder and Macy (2011) supports time of day and weekday. Power et al. (2015) is background on PM2.5 and anxiety, not momentary mood.</td></tr><tr><td>S8</td><td>Resolved</td><td>Public results replace confirmatory evidence labels with &#39;judged at 6 and 12 months&#39; and keep intervals and p_positive. The home page headline omits those factors. Covered by a test.</td></tr><tr><td>S9</td><td>Partly resolved</td><td>Section 2.9.3 names the overnight block that goes missing together, and sensitivity (7) imputes by chained equations. The primary model still draws independent N(0, 1) values for those five factors.</td></tr><tr><td>S10</td><td>Resolved</td><td>Complete-case is per confirmatory factor with other factors imputed as usual. The metric model is defined. Same-day behavior is exploratory only.</td></tr><tr><td>S11</td><td>Resolved</td><td>The repository will be public under GPL-3.0 at the named address when the protocol is finalized. &#39;On request&#39; is gone.</td></tr><tr><td>S12</td><td>Resolved</td><td>Experiments are unblinded self-experiments. Version 3.0 fixes the observational phase and the amendment template. Each amendment will cover the SPENT items for periods, sequence, concealment, and washout.</td></tr><tr><td>S13</td><td>Resolved</td><td>syncWeather uses yesterday in the participant&#39;s time zone. Weather is for the home location even on travel days.</td></tr><tr><td>m1</td><td>Resolved</td><td>Section 2.3.1 now says both timestamps are stored so the delay can be computed.</td></tr><tr><td>m2</td><td>Resolved</td><td>Section 2.8 matches the hourly job: an encrypted snapshot when about a day has passed, after a GPG recipient is set, last 30 kept.</td></tr><tr><td>m3</td><td>Resolved</td><td>Section 2.9.3 names a factor that never varies as a reason to drop it.</td></tr><tr><td>m4</td><td>Resolved</td><td>Weekly slot adherence from the study start is computed and shown on the private Trends page.</td></tr><tr><td>m5</td><td>Resolved</td><td>Both connectors are implemented. The Amazon path has been checked live; Ultrahuman waits on the Partner API token, with Apple Health until then.</td></tr><tr><td>m6</td><td>Resolved</td><td>phi is day-to-day carry-over of latent mood, analogous to but not the same as Kuppens et al. emotional inertia.</td></tr><tr><td>m7</td><td>Resolved</td><td>Section 2.9.8 names the parameters that must pass R-hat and ESS, matching summarize_fit.</td></tr><tr><td>m8</td><td>Resolved</td><td>Section 2.7 notes that the Tailscale certificate publishes the computer name in public CT logs.</td></tr>
+</tbody></table></div>
+
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S20</strong> <span class="muted">(2.9.9; software/analysis/mood.stan)</span> Sensitivity (1) says the confirmatory factors will be refit with prior standard deviations 0.25 and 1. mood.stan hardcodes those coefficients as 0.5 times beta_z. prior_scale only sets tau, so the confirmatory half of sensitivity (1) cannot be run without editing the locked model.
+  <br><em>Requested change:</em> Pass the confirmatory scale as data, the same way prior_scale is passed for tau, so 0.25 and 1 do not require a model amendment.</li><li><strong>S21</strong> <span class="muted">(2.11; software/analysis/mood.R; software/server/analysis.ts fingerprint)</span> If study_start is unset, load_dataset treats every report as confirmatory data, so a fit can start on the pilot. Changing study_start is not part of the analysis fingerprint, so an existing fit is not redone when the date is set.
+  <br><em>Requested change:</em> Refuse to fit until study_start is set, and include that date in the fingerprint so a change forces a refit.</li><li><strong>S22</strong> <span class="muted">(2.9.5; software/analysis/mood.R build_factors)</span> When social media time is kept, screen time becomes other screen time and is missing wherever either field is missing. Other screen time can then fall under the 50% or 10-day rule while social media time remains, so H3a is dropped and H3b is still tested. The protocol only states the reverse case.
+  <br><em>Requested change:</em> State that if other screen time is left out while social media time remains, H3a is not testable and H3b is judged on social media time.</li></ol>
+<h4>Minor</h4>
+<ol class="points"><li><strong>m20</strong> <span class="muted">(2.6)</span> The first design run is said to have had 33 studies per condition at 12 months. The stored files have 33 studies with effects and 32 under the null.
+  <br><em>Requested change:</em> Report 33 and 32, or say about 33 per condition.</li><li><strong>m21</strong> <span class="muted">(2.3.3; software/server/stats.ts weeklyAdherence)</span> For the week in progress, eligible slots are three times the number of calendar days, including slots that have not begun.
+  <br><em>Requested change:</em> Count only slots whose start has passed, or say the current week is provisional. Completed weeks are already exact.</li></ol>
+<h4>Response</h4>
+<div class="response"><p>Thank you for the second review and for accepting the protocol. The
+remaining points are answered below; the software changes come with
+tests.</p>
+<p><strong>S9 (round 1).</strong> Kept as a stated limitation. Modeling
+the joint missingness of the overnight block inside the Stan model would
+require a model of the joint distribution of five device measures and
+their autocorrelation, for nights without the ring, which the design
+analysis assumed to be one in ten. The protocol states that the primary
+model imputes these factors independently (Section 2.9.3). Sensitivity
+analysis (7), multiple imputation by chained equations with the adjacent
+days as predictors, imputes the block with its correlations and shows
+whether the independence matters.</p>
+<p><strong>S20.</strong> Accepted and implemented. Both Stan models now
+take the confirmatory prior scale as data
+(<code>confirmatory_scale</code>), like the scale of τ, and
+<code>refit.R</code> accepts <code>--prior-scale</code> and
+<code>--confirmatory-scale</code>. Sensitivity analysis (1) therefore
+runs without any change to the model code. At the default of 0.5 the
+model is the same, so its version stays ordinal-ar1-stan-v4; the slow
+tests were run again on the changed code (Section 2.9.9).</p>
+<p><strong>S21.</strong> Accepted and implemented. No model, primary,
+secondary or tag comparison, is fitted while the study start is unset.
+Each fit records the study start it used, and the start is part of the
+fingerprint, so a change triggers a refit. A fit made under another
+start is flagged on the dashboard and is never published. Tests cover
+the unset start in R and the changed start in Node (Sections 2.9.8, 2.11
+and 2.12).</p>
+<p><strong>S22.</strong> Accepted. Section 2.9.5 now states the case:
+other screen time is missing whenever either of its entries is, so it
+can be left out while social media time stays. Then H3a is not testable,
+and H3b is judged on social media time without other screen time held
+fixed.</p>
+<p><strong>m20.</strong> Accepted. Section 2.6 now gives 33 studies with
+effects and 32 under the null for the first run at 12 months.</p>
+<p><strong>m21.</strong> Accepted and fixed. Weekly adherence and the
+14-day completion now count only the slots that have begun, so the
+current week is exact as well; a test covers a study that starts
+today.</p>
+</div>
+</section><h2 id="round-3">Round 3</h2>
+<section class="card review" id="round-3-gpt-6-astra">
+<h3>GPT-6-Astra: Revise</h3>
+<p class="small muted">OpenAI GPT-6-Astra through the Codex command line tool (codex-cli 0.155.1), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> Most concerns are resolved. M20 remains partly unresolved, and the new claim that safety is checked at every report contradicts ordinary app behavior. Findings rely on source inspection, saved-result checks, and in-memory probes. Full application tests and new Stan fits were not run; R startup failed under filesystem restrictions.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>Pilot and confirmatory collection are clearly distinguished. Remaining cutoff enforcement problems are addressed under M20.</td></tr><tr><td>M2</td><td>Resolved</td><td>Whole-day weather and evening context remain explicit contemporaneous adjustment exceptions.</td></tr><tr><td>M3</td><td>Resolved</td><td>Weather collection stops at yesterday in the participant&#39;s time zone; calendar-day aggregation remains specified.</td></tr><tr><td>M4</td><td>Resolved</td><td>Outcome-dependent nonresponse is acknowledged as potentially biasing both average mood and associations.</td></tr><tr><td>M5</td><td>Resolved</td><td>Binary contrasts explicitly replace observed or imputed contributions with predictions at 1 and 0.</td></tr><tr><td>M6</td><td>Resolved</td><td>Convergence requirements, flagged private display, and confirmatory reruns remain specified. Cutoff-related publication problems belong to M20.</td></tr><tr><td>M7</td><td>Resolved</td><td>Evidence categories use unrounded probabilities; rounding occurs afterward.</td></tr><tr><td>M8</td><td>Resolved</td><td>Design simulations generate outcomes from rounded covariates and convert true effects using each replicate&#39;s fitted standard deviations.</td></tr><tr><td>M9</td><td>Resolved</td><td>Opt-in recovery tests cover both models and check effect detection and divergent transitions.</td></tr><tr><td>M10</td><td>Resolved</td><td>Evening submissions save edited fields only, preserving intervening automatic updates.</td></tr><tr><td>M11</td><td>Resolved</td><td>Device submissions, including duplicate reports, receive acknowledgments without stored values.</td></tr><tr><td>M12</td><td>Resolved</td><td>Nested publication fields remain explicitly constructed. The isolated adversarial-field test passed.</td></tr><tr><td>M13</td><td>Resolved</td><td>Section 3.2 now correctly describes retention of the latest 30 snapshots and visible push delivery and application-identification metadata.</td></tr><tr><td>M14</td><td>Resolved</td><td>Both adherence denominators count only begun slots. Fixed-time probes confirmed morning, afternoon, evening, and boundary behavior.</td></tr><tr><td>M15</td><td>Resolved</td><td>The private Canadian setting, rationale concerning institutional review, and planned ethics reassessment remain explicit.</td></tr><tr><td>M16</td><td>Resolved</td><td>The previously corrected statement about daily and weekly expressed-mood rhythms and its citation remain unchanged.</td></tr><tr><td>S1</td><td>Resolved</td><td>Other screen time replaces total screen time when social media is modeled. Fallback estimands are now also explicit.</td></tr><tr><td>S2</td><td>Resolved</td><td>Independent-imputation limitations and the temporally informed, type-appropriate multiple-imputation sensitivity remain specified.</td></tr><tr><td>S3</td><td>Resolved</td><td>One-report-per-slot and informative-nonresponse sensitivities remain specified, with an operational reminder-response definition.</td></tr><tr><td>S4</td><td>Resolved</td><td>Saved CSVs support the reported design results, including the corrected first-run counts. Convergence and unsimulated-remediation limitations remain explicit.</td></tr><tr><td>S5</td><td>Resolved</td><td>Scheduled threshold-specific checks now specify a comparison criterion and reporting response. S21 requests further implementation detail.</td></tr><tr><td>S6</td><td>Resolved</td><td>Source filtering, overlap checks, monitor placement, and the proprietary HRV definition are explicit. The RMSSD statement matches the cited [manufacturer source](https://www.ultrahuman.com/blog/rmssd-vs-sdnn-hrv-metrics-explained/).</td></tr><tr><td>S7</td><td>Resolved</td><td>Prospective experiment amendments retain the requested design, estimand, adherence, carryover, adjustment, and reporting requirements.</td></tr><tr><td>S8</td><td>Partly resolved</td><td>Fresh rating-page requests now check safety, but reusing an existing page bypasses reassessment. The new per-report claim is addressed in M24.</td></tr><tr><td>S9</td><td>Resolved</td><td>Early stopping permits confirmatory analysis and requires reporting its date and reason.</td></tr><tr><td>S10</td><td>Resolved</td><td>Identifiable health disclosure, inference across updates, and limits on withdrawing public history remain acknowledged.</td></tr><tr><td>m1</td><td>Resolved</td><td>Appendix B retains the reporting-item mapping and distinguishes observational requirements from future experiment amendments.</td></tr><tr><td>m2</td><td>Resolved</td><td>The conditional latent process and its innovation variability remain distinguished from observed mood variability.</td></tr><tr><td>m3</td><td>Resolved</td><td>Search details, device scope, and manufacturer affiliations remain specified. The exact PubMed record count was not independently reproduced.</td></tr><tr><td>M20</td><td>Partly resolved</td><td>Unset-start guards, provenance, and fingerprints are fixed. However, software/scripts/cli.ts:39 checks the cutoff cached before awaiting the fit; an in-memory probe published an obsolete fit after the cutoff changed. Re-read the current cutoff at publication and test this transition. Trends also needs cutoff provenance and stale handling for tag comparisons, including waiting runs (routes.ts:206; refit.R:54).</td></tr><tr><td>M21</td><td>Resolved</td><td>The idempotent migration adds study_start. In-memory upgrades preserved existing data and allowed authentication queries after repeated migration.</td></tr><tr><td>M22</td><td>Resolved</td><td>Responses lacking the requested date are skipped. In-memory probes confirmed date alignment and exclusion of current-day steps.</td></tr><tr><td>M23</td><td>Resolved</td><td>Predictive checks now use 2.5th and 97.5th percentiles, classify failures before rounding, and display failure markers and counts.</td></tr><tr><td>S20</td><td>Resolved</td><td>The deterministic contrast test checks exact predictors for observed yes, observed no, and missing flags, plus continuous-unit shifts.</td></tr>
+</tbody></table></div>
+<h4>Must fix</h4>
+<ol class="points"><li><strong>M24</strong> <span class="muted">(Section 2.11; software/static/sw.js:63; software/static/js/rate.js:99; software/server/routes.ts:68)</span> The new claim that safety is checked at every report is false. Reminders focus an existing rating page without navigation, submissions do not reload that page, and visibility changes only flush its queue. Safety is evaluated on page requests, not report submissions, so repeated successful reporting can cross the threshold without displaying a notice.
+  <br><em>Requested change:</em> Refresh safety assessment and its notice after successful report delivery and when an existing page resumes or reconnects, or replace the claim with an accurate, explicit review schedule. Test threshold crossing from an already open page, including queued-report synchronization.</li></ol>
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S21</strong> <span class="muted">(Section 2.9.8)</span> The new threshold-specific diagnostic leaves its probability parameterization and prior treatment implicit. Unequal cumulative-logit slopes can cross and produce invalid category probabilities, as described in the [VGAM documentation](https://search.r-project.org/CRAN/refmans/VGAM/html/cumulative.html). No invalid implementation has been demonstrated.
+  <br><em>Requested change:</em> Specify the refit&#39;s likelihood, how priors extend to the two coefficients, and how cumulative probabilities remain ordered for observed and imputed covariates.</li><li><strong>S22</strong> <span class="muted">(software/tests/app.test.ts:246)</span> The new adherence regression test depends on the current clock. During the evening slot, its assertions also pass with the former incorrect three-slot denominator.
+  <br><em>Requested change:</em> Use fixed morning and afternoon times with known answered slots, asserting both completion and weekly adherence denominators.</li></ol>
+
+<h4>Response</h4>
+<div class="response"><p>Thank you again. The in-memory probes found two real gaps, both now
+closed; the changes are below, each with a test.</p>
+<p><strong>M20.</strong> Accepted and fixed.</p>
+<ul>
+<li><strong>Publication.</strong> The gate now sits inside
+<code>publish()</code>, the one function every publication goes through.
+It re-reads the study start from the database when the page is written,
+so a fit made before the start changed is never published, whoever
+called <code>publish()</code> and whatever start that caller had read.
+<code>publishable()</code> takes only the fit and reads the current
+start itself. The test makes a fit under one start, changes the start in
+the database and checks that the same fit is refused.</li>
+<li><strong>One reading per run.</strong> <code>refit.R</code> reads the
+study start once and passes it to the tag comparisons and the model, so
+both use the same start.</li>
+<li><strong>Tag comparisons.</strong> Every run records its start,
+waiting runs included (<code>data.study_start</code>). The Trends page
+shows tag comparisons only from a run whose recorded start equals the
+current one.</li>
+</ul>
+<p><strong>M24.</strong> Accepted and fixed; the claim was wrong for a
+page that stays open.</p>
+<ul>
+<li><strong>The notice.</strong> It is now always in the home and rating
+pages, hidden unless the rule is met.</li>
+<li><strong>After each report.</strong> The response to every report the
+app sends carries the rule’s current state. The page updates the notice
+after each report it sends, including reports sent later from the
+phone’s queue.</li>
+<li><strong>On resume.</strong> When an open page returns to the screen
+or reconnects, it sends its queue and then asks
+<code>/api/safety/</code>.</li>
+<li><strong>Device tokens.</strong> Reports sent with a device token
+still get only an acknowledgment. Section 2.11 now states this schedule,
+and that reports from a phone automation are covered the next time the
+app is used.</li>
+<li><strong>Test.</strong> A new user keeps one session open and sends
+ten Sad reports, the earlier ones backdated as queued reports are. The
+first nine answers carry <code>safety: false</code>, the tenth
+<code>true</code>, and <code>/api/safety/</code> and the rating page
+then agree. The device test still checks that a token’s answer has only
+the id, date and slot.</li>
+</ul>
+<p><strong>S21.</strong> Accepted. Section 2.9.8 now gives the
+diagnostic variant in full; it is not a change to the primary model.</p>
+<ul>
+<li><strong>Likelihood.</strong> Pr(y ≤ k) = logit⁻¹(c_k − η^(−j) − β_jk
+x_j) for the two thresholds. Everything else, the imputation included,
+is as in the primary model.</li>
+<li><strong>Priors.</strong> β_j1 and β_j2 each have the factor’s
+normal(0, 0.5) prior.</li>
+<li><strong>Ordering.</strong> Zero posterior density is given to
+parameter values for which c_1 − β_j1 x &lt; c_2 − β_j2 x fails for any
+report, with observed and imputed values alike. This truncates the prior
+to the region where the model is valid.</li>
+<li><strong>Criterion and code.</strong> The failure criterion is the
+95% interval of β_j1 − β_j2. The Stan file (ordinal-ar1-ppo-check-v1),
+which implements exactly this specification, is added before the 6-month
+analysis.</li>
+</ul>
+<p><strong>S22.</strong> Accepted. <code>completion()</code> and
+<code>weeklyAdherence()</code> now take the current time as an argument,
+and the test uses fixed times with a fixed report. One morning report on
+the first study day gives 1 of 1 at 10 AM and 1 of 2 at 2 PM, for both
+measures. The former three-slot denominator would give 1 of 3 at both
+times and fail. The clock-dependent assertions were removed.</p>
+</div>
+</section><section class="card review" id="round-3-grok-4.6">
+<h3>Grok 4.6: Accept</h3>
+<p class="small muted">xAI Grok 4.6 through the Grok command line tool (grok 1.0.30 (04b7ffed98c6) [stable]), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> The remaining round 2 items are fixed or declined for a stated reason. The confirmatory prior scale is now passed as data, no model is fitted until the study start is set, and Section 2.9.5 covers the case where other screen time is dropped while social media time remains. I am satisfied the protocol can be finalized. The new proportional odds check in Section 2.9.8 should still name its prior and keep the two cumulative logits ordered.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>No regression: load_dataset still filters on users.study_start, and that start must now be set before any model is fitted.</td></tr><tr><td>M2</td><td>Resolved</td><td>No regression: other screen time is still recoded when social media time is modeled.</td></tr><tr><td>M3</td><td>Resolved</td><td>No regression: the pre-report claim and the adjustment covariates are unchanged.</td></tr><tr><td>S1</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S2</td><td>Resolved</td><td>No regression: the stored design files still match the table in Section 2.6.</td></tr><tr><td>S3</td><td>Resolved</td><td>No regression: Appendix A now also files Ultrahuman values only under the requested date.</td></tr><tr><td>S4</td><td>Resolved</td><td>No regression: day_satisfaction.stan remains day-ordinal-ar1-stan-v2 and now takes confirmatory_scale as data.</td></tr><tr><td>S5</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S6</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S7</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S8</td><td>Resolved</td><td>No regression: public results still replace confirmatory evidence labels, and the home headline still omits those factors.</td></tr><tr><td>S9</td><td>Resolved</td><td>Declined for a sound reason. Section 2.9.3 still states independent N(0, 1) imputation of the overnight block; sensitivity (7) is the check of that assumption.</td></tr><tr><td>S10</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S11</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S12</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S13</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m1</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m2</td><td>Resolved</td><td>No regression; Section 3.2 now matches the code (last 30 backups, not 30 days).</td></tr><tr><td>m3</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m4</td><td>Resolved</td><td>No regression; weekly adherence now also counts only slots that have begun.</td></tr><tr><td>m5</td><td>Resolved</td><td>No regression; the Ultrahuman date-key rule is implemented and tested.</td></tr><tr><td>m6</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m7</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m8</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S20</td><td>Resolved</td><td>mood.stan and day_satisfaction.stan take confirmatory_scale as data; refit.R accepts --confirmatory-scale; sensitivity (1) notes that both scales are data.</td></tr><tr><td>S21</td><td>Resolved</td><td>load_dataset, load_day_dataset, and tag_associations refuse an unset start; fingerprint includes study_start; publishable requires a match; tests cover the unset start and a changed start.</td></tr><tr><td>S22</td><td>Resolved</td><td>Section 2.9.5 now states that if other screen time is left out while social media time remains, H3a is not testable and H3b is judged without other screen time held fixed.</td></tr><tr><td>m20</td><td>Resolved</td><td>Section 2.6 now reports 33 studies with effects and 32 under the null, matching the stored first-run files.</td></tr><tr><td>m21</td><td>Resolved</td><td>begunSlots counts only slots whose start has passed; a test covers a study that starts today.</td></tr>
+</tbody></table></div>
+
+<h4>Should fix</h4>
+<ol class="points"><li><strong>S23</strong> <span class="muted">(2.9.8)</span> The new proportional odds check refits each confirmatory factor with two threshold-specific coefficients, but it does not give the prior on those coefficients or on their difference, and it does not say how the two cumulative logits stay ordered. Without that, category probabilities can become invalid, and the check cannot be reproduced from the locked model ordinal-ar1-stan-v4.
+  <br><em>Requested change:</em> State that this is a diagnostic variant, not a change to ordinal-ar1-stan-v4. Give the prior on the two coefficients or on their difference. Require that the two cumulative logits remain ordered for every report. Name the variant&#39;s model version, or say the Stan file will be published as an amendment before the 6-month analysis.</li></ol>
+
+<h4>Response</h4>
+<div class="response"><p>Thank you for accepting the protocol again.</p>
+<p><strong>S23.</strong> Accepted. Section 2.9.8 now specifies the
+proportional odds check as a diagnostic variant, stating that it is not
+a change to ordinal-ar1-stan-v4.</p>
+<ul>
+<li><strong>Likelihood.</strong> Pr(y ≤ k) = logit⁻¹(c_k − η^(−j) − β_jk
+x_j) for the two thresholds. The likelihood, priors and imputation are
+otherwise the primary model’s.</li>
+<li><strong>Priors.</strong> β_j1 and β_j2 each have the factor’s
+normal(0, 0.5) prior.</li>
+<li><strong>Ordering.</strong> The variant gives zero posterior density
+to parameter values for which c_1 − β_j1 x &lt; c_2 − β_j2 x fails for
+any report, observed or imputed. This truncates the prior to the region
+where the cumulative probabilities are ordered.</li>
+<li><strong>Criterion.</strong> The check fails if the 95% interval of
+β_j1 − β_j2 excludes zero.</li>
+<li><strong>Version.</strong> The variant has its own model version,
+ordinal-ar1-ppo-check-v1. Its Stan file, which implements exactly this
+specification, is added before the 6-month analysis.</li>
+</ul>
+<p>This revision also makes two other changes. First, the safety notice
+is now updated after every report the app sends and when an open page
+returns to the screen. Second, a fit is published only if it used the
+study start set at the moment of publication, and tag comparisons are
+shown only from a run under the current study start.</p>
+</div>
+</section><h2 id="round-4">Round 4</h2>
+<section class="card review" id="round-4-gpt-6-astra">
+<h3>GPT-6-Astra: Revise</h3>
+<p class="small muted">OpenAI GPT-6-Astra through the Codex command line tool (codex-cli 0.155.1), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> One blocking safety-display race remains. Cutoff handling, diagnostic specification, and adherence tests are resolved. Findings use source inspection, saved-result recalculation, and in-memory probes; full application tests, browser testing, and new Stan fits were not run.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>Pilot and confirmatory collection remain clearly separated, with cutoff enforcement corrected.</td></tr><tr><td>M2</td><td>Resolved</td><td>Whole-day weather and evening context remain explicit contemporaneous adjustment exceptions.</td></tr><tr><td>M3</td><td>Resolved</td><td>Weather collection stops at yesterday in the participant&#39;s time zone.</td></tr><tr><td>M4</td><td>Resolved</td><td>Potential bias in average mood and associations from outcome-dependent nonresponse remains acknowledged.</td></tr><tr><td>M5</td><td>Resolved</td><td>Binary contrasts replace observed or imputed contributions with predictions at yes and no.</td></tr><tr><td>M6</td><td>Resolved</td><td>Convergence requirements, private warnings, confirmatory reruns, and publication gating remain implemented or specified.</td></tr><tr><td>M7</td><td>Resolved</td><td>Evidence categories are computed before probabilities are rounded.</td></tr><tr><td>M8</td><td>Resolved</td><td>Simulated outcomes use rounded covariates, and true effects use each replicate&#39;s fitted standard deviations.</td></tr><tr><td>M9</td><td>Resolved</td><td>Both opt-in recovery tests check effect detection and divergent transitions; they were not rerun.</td></tr><tr><td>M10</td><td>Resolved</td><td>Evening forms save edited fields only, preserving intervening automatic updates.</td></tr><tr><td>M11</td><td>Resolved</td><td>Device submissions retain acknowledgment-only responses, including duplicate reports.</td></tr><tr><td>M12</td><td>Resolved</td><td>Nested publication fields remain explicitly constructed and covered by the adversarial-field test.</td></tr><tr><td>M13</td><td>Resolved</td><td>Backup retention and push-service metadata disclosures remain accurate.</td></tr><tr><td>M14</td><td>Resolved</td><td>Both adherence measures count begun slots; fixed-time probes confirmed their denominators.</td></tr><tr><td>M15</td><td>Resolved</td><td>Private-study ethics rationale and prospective reassessment remain explicit.</td></tr><tr><td>M16</td><td>Resolved</td><td>Previously corrected expressed-mood rhythm statement and citation remain unchanged.</td></tr><tr><td>S1</td><td>Resolved</td><td>Other screen time and social media have distinct estimands, with fallback analyses specified.</td></tr><tr><td>S2</td><td>Resolved</td><td>Independent-imputation limitations and temporally informed, type-appropriate sensitivity analysis remain specified.</td></tr><tr><td>S3</td><td>Resolved</td><td>Slot restriction, informative-nonresponse sensitivity, and reminder-response definition remain explicit.</td></tr><tr><td>S4</td><td>Resolved</td><td>Recalculated CSV summaries match reported results; convergence and unsimulated-remediation limitations remain explicit.</td></tr><tr><td>S5</td><td>Resolved</td><td>Threshold-specific diagnostics now specify the model, comparison criterion, and reporting response.</td></tr><tr><td>S6</td><td>Resolved</td><td>Source filtering, overlap checks, monitor placement, and proprietary HRV limitations remain explicit.</td></tr><tr><td>S7</td><td>Resolved</td><td>Prospective experiment amendments retain design, estimand, adherence, carryover, and reporting requirements.</td></tr><tr><td>S8</td><td>Partly resolved</td><td>Routine safety refresh paths are implemented, but a stale response can hide an active notice; see M25.</td></tr><tr><td>S9</td><td>Resolved</td><td>Early stopping permits confirmatory analysis and requires reporting its date and reason.</td></tr><tr><td>S10</td><td>Resolved</td><td>Identifiable disclosure, inference across updates, and withdrawal limits remain acknowledged.</td></tr><tr><td>m1</td><td>Resolved</td><td>Reporting checklist retains the distinction between observational requirements and future experiments.</td></tr><tr><td>m2</td><td>Resolved</td><td>Conditional latent dynamics remain distinguished from observed mood variability.</td></tr><tr><td>m3</td><td>Resolved</td><td>Search details, device scope, and affiliations remain specified; exact record count was not independently reproduced.</td></tr><tr><td>M20</td><td>Resolved</td><td>Publication rereads the cutoff immediately before writing. Refits share one cutoff, waiting runs record it, and Trends suppresses stale tags. In-memory transition probes passed.</td></tr><tr><td>M21</td><td>Resolved</td><td>Idempotent migration retains study_start and preserves existing records.</td></tr><tr><td>M22</td><td>Resolved</td><td>Ultrahuman responses require the requested date, and current-day steps remain excluded.</td></tr><tr><td>M23</td><td>Resolved</td><td>Predictive checks use central 95% intervals, classify failures before rounding, and display failure markers and counts.</td></tr><tr><td>S20</td><td>Resolved</td><td>Deterministic contrast test covers observed yes, observed no, missing flags, and continuous shifts.</td></tr><tr><td>M24</td><td>Partly resolved</td><td>Submission, queue, resume, and reconnect paths pass ordinary in-memory checks. A new response-ordering race can reverse the notice; see M25.</td></tr><tr><td>S21</td><td>Resolved</td><td>Likelihood, coefficient priors, and joint ordering restriction now address the crossing concern described in the [VGAM documentation](https://search.r-project.org/CRAN/refmans/VGAM/html/cumulative.html). Diagnostic implementation is explicitly due before six months.</td></tr><tr><td>S22</td><td>Resolved</td><td>Fixed morning and afternoon tests assert both adherence measures and distinguish the former incorrect denominator.</td></tr>
+</tbody></table></div>
+<h4>Must fix</h4>
+<ol class="points"><li><strong>M25</strong> <span class="muted">(Section 2.11; software/static/js/rate.js:47-61,126-128)</span> A delayed safety refresh can overwrite a newer report&#39;s safety state. Executing the actual client script in memory reproduced this sequence: resume starts a refresh returning false; a subsequent threshold-crossing report shows the notice; the delayed false response hides it. The empty-queue timer does not restore the notice.
+  <br><em>Requested change:</em> Serialize safety refresh with report delivery or reject obsolete responses. Add a client regression test that delivers the older false response after the newer true response and verifies that the notice stays visible.</li></ol>
+
+
+<h4>Response</h4>
+<div class="response"><p>Thank you; the race was real, and running the page’s own script was
+the right way to find it.</p>
+<p><strong>M25.</strong> Accepted and fixed. The rating page numbers
+every request whose answer can change the safety notice: each report it
+sends, including queued ones, and each check when the page returns to
+the screen or reconnects. It applies an answer only if that request is
+still the latest one, so a slow answer to an older request can no longer
+undo a newer one (<code>rate.js</code>). A new test runs the actual
+<code>static/js/rate.js</code> in a minimal page with every request
+answered by hand:</p>
+<ol type="1">
+<li>The page returns to the screen and asks for the safety state.</li>
+<li>Before that answer arrives, a queued report crosses the threshold
+and the notice appears.</li>
+<li>The older answer arrives last, saying the rule is not met, and the
+notice stays visible.</li>
+<li>The newest check then decides.</li>
+</ol>
+<p>With the earlier code the test fails at step 3; with the fix it
+passes.</p>
+<p>This was the only point left in your fourth report. The participant
+decided to finalize the protocol with this fix instead of opening a
+fifth round; Section 3.4 and the review record say so.</p>
+</div>
+</section><section class="card review" id="round-4-grok-4.6">
+<h3>Grok 4.6: Accept</h3>
+<p class="small muted">xAI Grok 4.6 through the Grok command line tool (grok 1.0.30 (04b7ffed98c6) [stable]), reasoning effort xhigh; September 19, 2026.</p>
+<p><strong>Summary.</strong> Section 2.9.8 now specifies the proportional odds check as a diagnostic variant, not a change to ordinal-ar1-stan-v4, with independent N(0, 0.5) priors on the two threshold-specific coefficients, an ordering constraint for every report, and model version ordinal-ar1-ppo-check-v1 to be added before the 6-month analysis. The safety notice updates after reports the app sends and when a page returns to the screen or reconnects, and a fit is published only if it used the study start set at publication. I am satisfied the protocol can be finalized.</p>
+<h4>Points from the previous round</h4>
+<div class="table-wrap"><table><thead><tr><th>Point</th><th>Status</th><th>Comment</th></tr></thead><tbody>
+<tr><td>M1</td><td>Resolved</td><td>No regression: load_dataset still requires users.study_start and still drops earlier reports.</td></tr><tr><td>M2</td><td>Resolved</td><td>No regression: other screen time is still recoded when social media time is modeled.</td></tr><tr><td>M3</td><td>Resolved</td><td>No regression: the pre-report claim and the adjustment covariates are unchanged.</td></tr><tr><td>S1</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S2</td><td>Resolved</td><td>No regression: the stored design files still match Section 2.6.</td></tr><tr><td>S3</td><td>Resolved</td><td>No regression: Ultrahuman values are still filed only under the requested date.</td></tr><tr><td>S4</td><td>Resolved</td><td>No regression: day_satisfaction.stan remains day-ordinal-ar1-stan-v2 and still takes confirmatory_scale as data.</td></tr><tr><td>S5</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S6</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S7</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S8</td><td>Resolved</td><td>No regression: public results still replace confirmatory evidence labels, and the home headline still omits those factors.</td></tr><tr><td>S9</td><td>Resolved</td><td>Declined for a sound reason. Section 2.9.3 still states independent N(0, 1) imputation of the overnight block; sensitivity (7) remains the check.</td></tr><tr><td>S10</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S11</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S12</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S13</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m1</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m2</td><td>Resolved</td><td>No regression; Section 3.2 still matches the code (last 30 backups).</td></tr><tr><td>m3</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m4</td><td>Resolved</td><td>No regression; weekly adherence still counts only slots that have begun.</td></tr><tr><td>m5</td><td>Resolved</td><td>No regression; the Ultrahuman date-key rule is still implemented and tested.</td></tr><tr><td>m6</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m7</td><td>Resolved</td><td>No regression.</td></tr><tr><td>m8</td><td>Resolved</td><td>No regression.</td></tr><tr><td>S20</td><td>Resolved</td><td>No regression: mood.stan and day_satisfaction.stan still take confirmatory_scale as data.</td></tr><tr><td>S21</td><td>Resolved</td><td>No regression: publishable still requires a match to the study start set at the call; tag comparisons on the trends page are now shown only from a run under that start.</td></tr><tr><td>S22</td><td>Resolved</td><td>No regression: Section 2.9.5 still covers other screen time dropped while social media time remains.</td></tr><tr><td>m20</td><td>Resolved</td><td>No regression; Section 2.6 still matches the stored first-run files.</td></tr><tr><td>m21</td><td>Resolved</td><td>No regression; begunSlots still counts only slots whose start has passed.</td></tr><tr><td>S23</td><td>Resolved</td><td>Section 2.9.8 now names a diagnostic variant, gives independent N(0, 0.5) priors on the two coefficients, requires ordered cumulative logits for every report (observed and imputed), and names ordinal-ar1-ppo-check-v1 to be added before the 6-month analysis.</td></tr>
+</tbody></table></div>
+
+
+<h4>Minor</h4>
+<ol class="points"><li><strong>m22</strong> <span class="muted">(2.9.8)</span> A factor that fails the proportional odds check is to be reported with both coefficients next to its confirmatory result. Those coefficients are on the standardized log-odds scale, while the confirmatory result is an odds ratio per natural unit, so the two numbers are not comparable as written.
+  <br><em>Requested change:</em> Say that the two threshold-specific effects are reported on the same scale as the confirmatory estimand (odds ratio per natural unit, with 95% intervals), or say that they are log-odds per standard deviation.</li></ol>
+<h4>Response</h4>
+<div class="response"><p>Thank you for the fourth review and for accepting the protocol.</p>
+<p><strong>m22.</strong> Accepted. Section 2.9.8 now says that a factor
+failing the proportional odds check is reported with both
+threshold-specific effects as odds ratios per natural unit with 95%
+intervals, the scale of its confirmatory result.</p>
+<p>The only other change after your report fixed the rating page’s
+handling of the safety notice. An older, slower answer from the server
+can no longer hide the notice after a newer one showed it, and a test
+covers this.</p>
+</div>
+</section>
+<h2 id="prompts">The instructions the reviewers received</h2>
+<details><summary>Round 1</summary><pre class="prompt">You are an independent peer reviewer for a journal that publishes study protocols, such as BMJ Open, Trials or JMIR Research Protocols. Your expertise covers N-of-1 and single-case designs, ecological momentary assessment, Bayesian statistics (ordinal and time-series models in Stan), wearable and digital health data, and research ethics.
+
+The current directory holds the material, read-only:
+
+- `protocol.md`: the study protocol under review (version 3.0, review round 1).
+- `software/`: the study software the protocol describes, as supplementary material. Key files: `software/analysis/mood.stan` (the model), `software/analysis/mood.R` (data preparation, fitting and summaries), `software/analysis/refit.R`, `software/analysis/simulate.R` and `software/analysis/design.R` (simulation and design analysis), `software/server/schema.sql` (database), `software/server/study.ts` (study days, slots, validation), `software/server/maintenance.ts` (weather, the publication whitelist, backups), `software/server/stats.ts`, `software/README.md`.
+
+Context: the participant and the investigator are the same person, and data collection has not started. Two connectors described in the protocol, for the Ultrahuman Partner API and for the Amazon Smart Air Quality Monitor, are being implemented and are not in this snapshot; review their specification, not their absence. The design analysis in Section 2.6 is running and its results are not yet available.
+
+Review the protocol for:
+
+1. Completeness against the items of SPIRIT 2025 and its N-of-1 extension (SPENT 2019) that apply to an observational N-of-1 study followed by randomized N-of-1 experiments.
+2. Scientific and statistical validity: design, outcomes, timing rules, the model and its priors, identifiability, missing data, estimands, hypotheses and decision rules, interim looks, sensitivity analyses and the design analysis.
+3. Internal consistency, and consistency with the software: every present-tense statement about the software should be true of the code in `software/`.
+4. Whether each citation supports the statement it is attached to, where you can judge.
+5. Ethics, safety, privacy and data governance.
+6. Clarity.
+
+Classify each point you raise:
+
+- `must_fix`: a false statement, or one the code contradicts; a statistical error; a missing element without which the study cannot be evaluated or carried out as described; or an internal contradiction.
+- `should_fix`: an important improvement that is not an error.
+- `minor`: wording, presentation or a small omission.
+
+Matters of style or length, and design choices that the protocol states and justifies (including accepting a stated limitation), are not `must_fix`.
+
+Your verdict is `accept` if no `must_fix` point remains and `revise` otherwise. `accept` means you are satisfied that the protocol can be finalized; you may still list `should_fix` and `minor` points.
+
+For each point, name the section, state the problem and the concrete change you request. Be specific and brief. Do not rewrite the protocol, and do not modify any file. Number your points M1, M2 and so on for `must_fix`, S1, S2 for `should_fix`, and m1, m2 for `minor`. Leave `prior_points` empty in this round.
+
+Write in American English. Do not use em dashes, en dashes, double hyphens or spaced hyphens as punctuation; use commas, colons, semicolons or periods instead.
+
+Your final answer is one JSON object that follows the JSON Schema below. If your interface does not enforce the schema, put the object in a single fenced `json` code block and write nothing after it.
+
+```json
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;additionalProperties&quot;: false,
+  &quot;required&quot;: [
+    &quot;verdict&quot;,
+    &quot;summary&quot;,
+    &quot;prior_points&quot;,
+    &quot;must_fix&quot;,
+    &quot;should_fix&quot;,
+    &quot;minor&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;verdict&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;accept&quot;,
+        &quot;revise&quot;
+      ],
+      &quot;description&quot;: &quot;accept only if no must_fix point remains.&quot;
+    },
+    &quot;summary&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;Overall assessment in a few sentences.&quot;
+    },
+    &quot;prior_points&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;description&quot;: &quot;Round 2 onward: status of each point from your previous review. Empty in round 1.&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;status&quot;,
+          &quot;comment&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [
+              &quot;resolved&quot;,
+              &quot;partly_resolved&quot;,
+              &quot;not_resolved&quot;
+            ]
+          },
+          &quot;comment&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;must_fix&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;should_fix&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;minor&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    }
+  }
+}
+```
+</pre></details>
+<details><summary>Round 2 and later</summary><pre class="prompt">You are an independent peer reviewer for a journal that publishes study protocols, such as BMJ Open, Trials or JMIR Research Protocols, and you reviewed the previous version of this protocol. Your expertise covers N-of-1 and single-case designs, ecological momentary assessment, Bayesian statistics (ordinal and time-series models in Stan), wearable and digital health data, and research ethics.
+
+The current directory holds the material, read-only:
+
+- `protocol.md`: the revised protocol under review.
+- `protocol.diff`: the changes since the version you reviewed.
+- `previous-review.json`: your report on that version.
+- `response.md`: the investigator&#39;s point-by-point response to your report.
+- `software/`: the study software as it is now. Key files: `software/analysis/mood.stan` and `software/analysis/day_satisfaction.stan` (the models), `software/analysis/mood.R` (data preparation, fitting and summaries), `software/analysis/secondary.R`, `software/analysis/refit.R`, `software/analysis/simulate.R`, `software/analysis/design.R` with the results of its second run in `software/analysis/design-*.csv`, refits of some failed fits in `software/analysis/design-checks.txt`, and the results of its first run in `software/analysis/design-v3-shared-prior/`, `software/analysis/prior_check.R`, `software/analysis/tests/testthat/`, `software/server/schema.sql`, `software/server/sources.ts` (the Ultrahuman and Amazon connectors), `software/server/maintenance.ts`, `software/server/routes.ts`, `software/server/stats.ts`, `software/tests/app.test.ts`, `software/README.md`.
+
+Context: the participant and the investigator are the same person. A pilot started on 19 September 2026, the morning the review began; confirmatory data collection starts on the day after the protocol is finalized, and pilot reports never enter a model. The instructions for round 1 said that data collection had not started, which was out of date.
+
+Your tasks:
+
+1. For every point in your previous report, set its status in `prior_points`: `resolved`, `partly_resolved` or `not_resolved`, with a short comment. A point the investigator declined for a sound reason counts as resolved.
+2. Check the revision, including the changed code, for new errors. Raise a new `must_fix` point only for an error the revision introduced or a serious error you missed before. Raise new `should_fix` or `minor` points only about text or code that changed.
+3. Give your verdict.
+
+Classify each point you raise:
+
+- `must_fix`: a false statement, or one the code contradicts; a statistical error; a missing element without which the study cannot be evaluated or carried out as described; or an internal contradiction.
+- `should_fix`: an important improvement that is not an error.
+- `minor`: wording, presentation or a small omission.
+
+Matters of style or length, and design choices that the protocol states and justifies (including accepting a stated limitation), are not `must_fix`.
+
+Your verdict is `accept` if no `must_fix` point remains, counting earlier `must_fix` points that are not resolved, and `revise` otherwise. `accept` means you are satisfied that the protocol can be finalized; you may still list `should_fix` and `minor` points.
+
+For each new point, name the section, state the problem and the concrete change you request. Be specific and brief. Do not rewrite the protocol, and do not modify any file. Number new points so that they do not repeat earlier numbers, for example M20, S20 and m20.
+
+Write in American English. Do not use em dashes, en dashes, double hyphens or spaced hyphens as punctuation; use commas, colons, semicolons or periods instead.
+
+Your final answer is one JSON object that follows the JSON Schema below. If your interface does not enforce the schema, put the object in a single fenced `json` code block and write nothing after it.
+
+```json
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;additionalProperties&quot;: false,
+  &quot;required&quot;: [
+    &quot;verdict&quot;,
+    &quot;summary&quot;,
+    &quot;prior_points&quot;,
+    &quot;must_fix&quot;,
+    &quot;should_fix&quot;,
+    &quot;minor&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;verdict&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;accept&quot;,
+        &quot;revise&quot;
+      ],
+      &quot;description&quot;: &quot;accept only if no must_fix point remains.&quot;
+    },
+    &quot;summary&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;Overall assessment in a few sentences.&quot;
+    },
+    &quot;prior_points&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;description&quot;: &quot;Round 2 onward: status of each point from your previous review. Empty in round 1.&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;status&quot;,
+          &quot;comment&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [
+              &quot;resolved&quot;,
+              &quot;partly_resolved&quot;,
+              &quot;not_resolved&quot;
+            ]
+          },
+          &quot;comment&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;must_fix&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;should_fix&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    },
+    &quot;minor&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: false,
+        &quot;required&quot;: [
+          &quot;id&quot;,
+          &quot;section&quot;,
+          &quot;problem&quot;,
+          &quot;requested_change&quot;
+        ],
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Stable identifier, for example M1, S1, m1.&quot;
+          },
+          &quot;section&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Protocol section or file the point concerns.&quot;
+          },
+          &quot;problem&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;requested_change&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    }
+  }
+}
+```
+</pre></details>
+  </main>
+</body>
+</html>

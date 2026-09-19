@@ -1,0 +1,186 @@
+{
+  "verdict": "revise",
+  "summary": "Most prior concerns are resolved, and reported design-analysis results agree with supplied CSVs. Remaining privacy and adherence discrepancies, plus new pilot-exclusion, migration, date-assignment, and predictive-check inconsistencies, prevent finalization. Review used source inspection and in-memory probes; R tests and new Stan fits could not run in the read-only environment.",
+  "prior_points": [
+    {
+      "id": "M1",
+      "status": "resolved",
+      "comment": "Corrected context distinguishes the September 19 pilot from collection after finalization. The new implementation defect is addressed separately in M20."
+    },
+    {
+      "id": "M2",
+      "status": "resolved",
+      "comment": "Whole-day weather and evening context are explicitly identified as contemporaneous adjustment exceptions."
+    },
+    {
+      "id": "M3",
+      "status": "resolved",
+      "comment": "Weather now stops at yesterday in the participant's time zone; calendar-day aggregation is specified."
+    },
+    {
+      "id": "M4",
+      "status": "resolved",
+      "comment": "Outcome-dependent nonresponse is correctly acknowledged as capable of biasing associations and average mood."
+    },
+    {
+      "id": "M5",
+      "status": "resolved",
+      "comment": "Binary comparisons explicitly set each report's flag to 1 and 0, replacing its observed or imputed contribution."
+    },
+    {
+      "id": "M6",
+      "status": "resolved",
+      "comment": "Publication is gated by convergence; flagged private display is explicitly permitted, and confirmatory remediation is specified."
+    },
+    {
+      "id": "M7",
+      "status": "resolved",
+      "comment": "Evidence classification uses unrounded probabilities; rounding occurs only for reported values."
+    },
+    {
+      "id": "M8",
+      "status": "resolved",
+      "comment": "Generating and fitted scales are now distinguished. The corrected design analysis generates from rounded covariates and converts truth using each replicate's fitted standard deviations."
+    },
+    {
+      "id": "M9",
+      "status": "resolved",
+      "comment": "The supplied snapshot contains opt-in recovery assertions for both models, accurately described in Section 2.9.8."
+    },
+    {
+      "id": "M10",
+      "status": "resolved",
+      "comment": "The form saves edited fields only, preserving intervening automatic updates; conflicting writes now have an explicit rule."
+    },
+    {
+      "id": "M11",
+      "status": "resolved",
+      "comment": "Device POST responses return acknowledgments without stored values, including duplicate report submissions."
+    },
+    {
+      "id": "M12",
+      "status": "resolved",
+      "comment": "Nested intervals, levels, and dynamics are explicitly constructed, with tests for unexpected nested fields."
+    },
+    {
+      "id": "M13",
+      "status": "partly_resolved",
+      "comment": "Storage boundaries are substantially corrected. Section 3.2 still misstates backup retention as 30 elapsed days instead of the latest 30 successful snapshots by default, and push-service visibility as timing only rather than delivery and application-identification metadata. Correct both claims; see maintenance.ts:207, push.ts:71, and [RFC 8292](https://www.rfc-editor.org/rfc/rfc8292.html)."
+    },
+    {
+      "id": "M14",
+      "status": "partly_resolved",
+      "comment": "Weekly reporting exists, but stats.ts:30 and :46 still count future slots today. One first-morning report yields 1/3 instead of 1/1. Count only begun slots in both denominators."
+    },
+    {
+      "id": "M15",
+      "status": "resolved",
+      "comment": "The clarified private Canadian setting provides a sound nonapplicability rationale for institutional TCPS review, with reassessment before experiments. See [TCPS scope](https://ethics.gc.ca/eng/policy-politique_interpretations_scope-portee.html)."
+    },
+    {
+      "id": "M16",
+      "status": "resolved",
+      "comment": "[Golder and Macy](https://pubmed.ncbi.nlm.nih.gov/21960633/) supports the revised statement about daily and weekly expressed-mood rhythms."
+    },
+    {
+      "id": "S1",
+      "status": "resolved",
+      "comment": "Other screen time replaces total screen time when social media is modeled, and the addition estimand is explicit."
+    },
+    {
+      "id": "S2",
+      "status": "resolved",
+      "comment": "Independent-imputation limitations are acknowledged; type-appropriate, temporally informed multiple imputation is prespecified as a sensitivity analysis."
+    },
+    {
+      "id": "S3",
+      "status": "resolved",
+      "comment": "The revision adds one-report-per-slot and informative-nonresponse sensitivities, plus an operational reminder-response classification."
+    },
+    {
+      "id": "S4",
+      "status": "resolved",
+      "comment": "Expanded simulations, a precision target, Monte Carlo uncertainty, family-level results, and failed-fit counts are supplied. Short-chain and unsimulated-remediation limitations are explicit."
+    },
+    {
+      "id": "S5",
+      "status": "partly_resolved",
+      "comment": "Prior prediction, dependence checks, and PSIS remediation are added. Threshold-specific association checks remain unspecified; add a check of proportional-odds adequacy."
+    },
+    {
+      "id": "S6",
+      "status": "partly_resolved",
+      "comment": "The dictionary substantially improves measurement rules, but overlapping Apple Health samples, monitor placement, and the Ultrahuman HRV metric still need explicit definitions."
+    },
+    {
+      "id": "S7",
+      "status": "resolved",
+      "comment": "Prospective amendment requirements now cover estimands, adherence, deviations, periods, concealment, carryover, pretreatment adjustment, and reporting guidance."
+    },
+    {
+      "id": "S8",
+      "status": "partly_resolved",
+      "comment": "Information thresholds and pause procedures are specified. Safety checks run only at /, while routine reminders open /rate/; specify a minimum evaluation frequency or check the reporting route."
+    },
+    {
+      "id": "S9",
+      "status": "resolved",
+      "comment": "Early stopping explicitly permits confirmatory classification and requires reporting the stopping date and reason."
+    },
+    {
+      "id": "S10",
+      "status": "resolved",
+      "comment": "Identifiable health disclosure, inference across updates, and limits on withdrawing public history are acknowledged."
+    },
+    {
+      "id": "m1",
+      "status": "resolved",
+      "comment": "Appendix B provides the requested item mapping and separates observational requirements from future experiment amendments."
+    },
+    {
+      "id": "m2",
+      "status": "resolved",
+      "comment": "The text identifies the conditional latent process and distinguishes innovation variability from observed mood variability."
+    },
+    {
+      "id": "m3",
+      "status": "resolved",
+      "comment": "Device scope and search details are supplied, and relevant manufacturer-associated papers are identified. The exact 33-record count was not independently reproduced."
+    }
+  ],
+  "must_fix": [
+    {
+      "id": "M20",
+      "section": "Sections 2.11 and 2.12; software/analysis/mood.R:68; software/server/analysis.ts:56",
+      "problem": "An unset study_start defaults to 0000-01-01, permitting pilot observations in primary, secondary, and tag models. Changing study_start also leaves the analysis fingerprint unchanged, so existing fits can remain available for publication under an obsolete cutoff.",
+      "requested_change": "Require a configured study start before any modeling. Include it in fit provenance and invalidation, and prevent use or publication of fits based on an obsolete cutoff. Test unset and changed start dates."
+    },
+    {
+      "id": "M21",
+      "section": "software/server/schema.sql:10; software/server/db.ts:13; software/server/auth.ts",
+      "problem": "The new users.study_start column has no migration. CREATE TABLE IF NOT EXISTS leaves an existing users table unchanged, while authentication now selects that column. An in-memory upgrade probe produced 'no such column: study_start'.",
+      "requested_change": "Add an idempotent migration for users.study_start and test upgrading a database with the previous users schema."
+    },
+    {
+      "id": "M22",
+      "section": "Appendix A; software/server/sources.ts:83",
+      "problem": "When Ultrahuman omits the requested date, the connector substitutes the first returned date's metrics and stores them under the requested date. A synthetic September 19 request with only September 18 data was saved as September 19, contradicting the promised date alignment.",
+      "requested_change": "Skip responses without the requested date, or store returned records under their actual dates. Determine finished-day eligibility from the stored date and test mismatched-date responses."
+    },
+    {
+      "id": "M23",
+      "section": "Section 2.9.8; software/analysis/mood.R:337; software/server/pages.ts:360",
+      "problem": "The new per-fit predictive-check failure rule uses a central 95% interval, but current summaries export only 5th and 95th percentiles, a central 90% interval. No separate 95% bounds or failure assessment are supplied.",
+      "requested_change": "Provide the specified 95% bounds and failure reporting, or explicitly describe a separate planned assessment and distinguish it from the current 90% dashboard display."
+    }
+  ],
+  "should_fix": [
+    {
+      "id": "S20",
+      "section": "software/analysis/tests/testthat/test-recovery.R:28",
+      "problem": "The new binary-contrast test checks direction agreement only. The previous erroneous x + 1 comparison would also pass, so this test does not protect the correction.",
+      "requested_change": "Add a deterministic numerical comparison with explicit predictions at 1 and 0, including observed and missing flags. This need not run Stan."
+    }
+  ],
+  "minor": []
+}

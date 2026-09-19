@@ -1,0 +1,20 @@
+{
+  "name": "astudyonmyself",
+  "private": true,
+  "type": "module",
+  "description": "A local-first N-of-1 mood study: TypeScript web app, Bayesian analysis in R and Stan.",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node server/main.ts",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "test:r": "Rscript -e 'testthat::test_dir(\"analysis/tests/testthat\")'"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  }
+}

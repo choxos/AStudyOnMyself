@@ -1,0 +1,201 @@
+{
+  "verdict": "revise",
+  "summary": "One blocking safety-display race remains. Cutoff handling, diagnostic specification, and adherence tests are resolved. Findings use source inspection, saved-result recalculation, and in-memory probes; full application tests, browser testing, and new Stan fits were not run.",
+  "prior_points": [
+    {
+      "id": "M1",
+      "status": "resolved",
+      "comment": "Pilot and confirmatory collection remain clearly separated, with cutoff enforcement corrected."
+    },
+    {
+      "id": "M2",
+      "status": "resolved",
+      "comment": "Whole-day weather and evening context remain explicit contemporaneous adjustment exceptions."
+    },
+    {
+      "id": "M3",
+      "status": "resolved",
+      "comment": "Weather collection stops at yesterday in the participant's time zone."
+    },
+    {
+      "id": "M4",
+      "status": "resolved",
+      "comment": "Potential bias in average mood and associations from outcome-dependent nonresponse remains acknowledged."
+    },
+    {
+      "id": "M5",
+      "status": "resolved",
+      "comment": "Binary contrasts replace observed or imputed contributions with predictions at yes and no."
+    },
+    {
+      "id": "M6",
+      "status": "resolved",
+      "comment": "Convergence requirements, private warnings, confirmatory reruns, and publication gating remain implemented or specified."
+    },
+    {
+      "id": "M7",
+      "status": "resolved",
+      "comment": "Evidence categories are computed before probabilities are rounded."
+    },
+    {
+      "id": "M8",
+      "status": "resolved",
+      "comment": "Simulated outcomes use rounded covariates, and true effects use each replicate's fitted standard deviations."
+    },
+    {
+      "id": "M9",
+      "status": "resolved",
+      "comment": "Both opt-in recovery tests check effect detection and divergent transitions; they were not rerun."
+    },
+    {
+      "id": "M10",
+      "status": "resolved",
+      "comment": "Evening forms save edited fields only, preserving intervening automatic updates."
+    },
+    {
+      "id": "M11",
+      "status": "resolved",
+      "comment": "Device submissions retain acknowledgment-only responses, including duplicate reports."
+    },
+    {
+      "id": "M12",
+      "status": "resolved",
+      "comment": "Nested publication fields remain explicitly constructed and covered by the adversarial-field test."
+    },
+    {
+      "id": "M13",
+      "status": "resolved",
+      "comment": "Backup retention and push-service metadata disclosures remain accurate."
+    },
+    {
+      "id": "M14",
+      "status": "resolved",
+      "comment": "Both adherence measures count begun slots; fixed-time probes confirmed their denominators."
+    },
+    {
+      "id": "M15",
+      "status": "resolved",
+      "comment": "Private-study ethics rationale and prospective reassessment remain explicit."
+    },
+    {
+      "id": "M16",
+      "status": "resolved",
+      "comment": "Previously corrected expressed-mood rhythm statement and citation remain unchanged."
+    },
+    {
+      "id": "S1",
+      "status": "resolved",
+      "comment": "Other screen time and social media have distinct estimands, with fallback analyses specified."
+    },
+    {
+      "id": "S2",
+      "status": "resolved",
+      "comment": "Independent-imputation limitations and temporally informed, type-appropriate sensitivity analysis remain specified."
+    },
+    {
+      "id": "S3",
+      "status": "resolved",
+      "comment": "Slot restriction, informative-nonresponse sensitivity, and reminder-response definition remain explicit."
+    },
+    {
+      "id": "S4",
+      "status": "resolved",
+      "comment": "Recalculated CSV summaries match reported results; convergence and unsimulated-remediation limitations remain explicit."
+    },
+    {
+      "id": "S5",
+      "status": "resolved",
+      "comment": "Threshold-specific diagnostics now specify the model, comparison criterion, and reporting response."
+    },
+    {
+      "id": "S6",
+      "status": "resolved",
+      "comment": "Source filtering, overlap checks, monitor placement, and proprietary HRV limitations remain explicit."
+    },
+    {
+      "id": "S7",
+      "status": "resolved",
+      "comment": "Prospective experiment amendments retain design, estimand, adherence, carryover, and reporting requirements."
+    },
+    {
+      "id": "S8",
+      "status": "partly_resolved",
+      "comment": "Routine safety refresh paths are implemented, but a stale response can hide an active notice; see M25."
+    },
+    {
+      "id": "S9",
+      "status": "resolved",
+      "comment": "Early stopping permits confirmatory analysis and requires reporting its date and reason."
+    },
+    {
+      "id": "S10",
+      "status": "resolved",
+      "comment": "Identifiable disclosure, inference across updates, and withdrawal limits remain acknowledged."
+    },
+    {
+      "id": "m1",
+      "status": "resolved",
+      "comment": "Reporting checklist retains the distinction between observational requirements and future experiments."
+    },
+    {
+      "id": "m2",
+      "status": "resolved",
+      "comment": "Conditional latent dynamics remain distinguished from observed mood variability."
+    },
+    {
+      "id": "m3",
+      "status": "resolved",
+      "comment": "Search details, device scope, and affiliations remain specified; exact record count was not independently reproduced."
+    },
+    {
+      "id": "M20",
+      "status": "resolved",
+      "comment": "Publication rereads the cutoff immediately before writing. Refits share one cutoff, waiting runs record it, and Trends suppresses stale tags. In-memory transition probes passed."
+    },
+    {
+      "id": "M21",
+      "status": "resolved",
+      "comment": "Idempotent migration retains study_start and preserves existing records."
+    },
+    {
+      "id": "M22",
+      "status": "resolved",
+      "comment": "Ultrahuman responses require the requested date, and current-day steps remain excluded."
+    },
+    {
+      "id": "M23",
+      "status": "resolved",
+      "comment": "Predictive checks use central 95% intervals, classify failures before rounding, and display failure markers and counts."
+    },
+    {
+      "id": "S20",
+      "status": "resolved",
+      "comment": "Deterministic contrast test covers observed yes, observed no, missing flags, and continuous shifts."
+    },
+    {
+      "id": "M24",
+      "status": "partly_resolved",
+      "comment": "Submission, queue, resume, and reconnect paths pass ordinary in-memory checks. A new response-ordering race can reverse the notice; see M25."
+    },
+    {
+      "id": "S21",
+      "status": "resolved",
+      "comment": "Likelihood, coefficient priors, and joint ordering restriction now address the crossing concern described in the [VGAM documentation](https://search.r-project.org/CRAN/refmans/VGAM/html/cumulative.html). Diagnostic implementation is explicitly due before six months."
+    },
+    {
+      "id": "S22",
+      "status": "resolved",
+      "comment": "Fixed morning and afternoon tests assert both adherence measures and distinguish the former incorrect denominator."
+    }
+  ],
+  "must_fix": [
+    {
+      "id": "M25",
+      "section": "Section 2.11; software/static/js/rate.js:47-61,126-128",
+      "problem": "A delayed safety refresh can overwrite a newer report's safety state. Executing the actual client script in memory reproduced this sequence: resume starts a refresh returning false; a subsequent threshold-crossing report shows the notice; the delayed false response hides it. The empty-queue timer does not restore the notice.",
+      "requested_change": "Serialize safety refresh with report delivery or reject obsolete responses. Add a client regression test that delivers the older false response after the newer true response and verifies that the notice stays visible."
+    }
+  ],
+  "should_fix": [],
+  "minor": []
+}

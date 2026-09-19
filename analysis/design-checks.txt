@@ -1,0 +1,8 @@
+Refits of design-analysis replicates that failed the convergence checks with 1,000 warmup iterations and 1,000 draws per chain (protocol Section 2.6),
+made with: Rscript analysis/design.R --scenario SCENARIO --days 365 --check REP [--iter 4000 --adapt-delta 0.99]
+
+null, 365 days, replicate 2, 2000 warmup and 2000 draws per chain, adapt_delta 0.95: largest R-hat 1.0041, smallest bulk ESS 723 (sigma_day), 0 divergent transitions: passes
+null, 365 days, replicate 3, 2000 warmup and 2000 draws per chain, adapt_delta 0.95: largest R-hat 1.0029, smallest bulk ESS 882 (sigma_day), 7 divergent transitions: fails
+null, 365 days, replicate 3, 4000 warmup and 4000 draws per chain, adapt_delta 0.99: largest R-hat 1.0017, smallest bulk ESS 1544 (sigma_day), 0 divergent transitions: passes
+effects, 365 days, replicate 1, 2000 warmup and 2000 draws per chain, adapt_delta 0.95: largest R-hat 1.0027, smallest bulk ESS 957 (sigma_day), 0 divergent transitions: passes
+effects, 365 days, replicate 2, 2000 warmup and 2000 draws per chain, adapt_delta 0.95: largest R-hat 1.0033, smallest bulk ESS 707 (sigma_day), 0 divergent transitions: passes

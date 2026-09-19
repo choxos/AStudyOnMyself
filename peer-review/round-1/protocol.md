@@ -1,0 +1,370 @@
+# A Study On Myself: Protocol for an N-of-1 Bayesian Study of Momentary Mood and Daily Satisfaction
+
+## Administrative Information
+
+| Item | Details |
+|---|---|
+| Protocol version | 3.0, draft for review (round 1) |
+| Date | 19 September 2026 |
+| Investigator and participant | Ahmad Sofi-Mahmudi (one person in both roles) |
+| Status | Data collection started on 19 September 2026. The model starts once there are 30 reports on 14 different days, so no model had been fitted to the study data when this version was written. |
+| Registration | Not registered in a trial registry. The finalized protocol, the record of its review and the SHA-256 hash of the protocol file are published at https://choxos.github.io/astudyonmyself/protocol.html, and the public commit history of that site timestamps each version. |
+| Funding and sponsor | None. The study is self-funded and has no sponsor. |
+| Competing interests | None declared. |
+| Roles | The participant designed the study, built the software, collects and analyzes the data, and will write the reports. |
+| Use of AI tools | AI tools helped write the study software and revise this protocol. Two AI models review the protocol; their reports and the responses are published with it (Section 3.4). |
+
+## Revision History
+
+| Version | Date | Changes |
+|---|---|---|
+| 1.0 | August 2025 | First version. |
+| 2.0 | September 2026 | Revised together with the study software: the outcome redefined as momentary mood, with a secondary evening rating of the day; the Bayesian ordinal model specified; factors enter only with information available before the reports they predict; the local, encrypted infrastructure described; a public results page and its privacy rules added; confirmatory hypotheses and embedded N-of-1 experiments specified; citations that did not support their statements corrected or replaced. The software was then rewritten as a TypeScript web application with the analysis in R and Stan; the model was unchanged. |
+| 3.0 | September 2026 | Completed against the SPIRIT 2025 and SPENT 2019 items that apply (administrative information, participant timeline, monitoring, harms, amendments, open science); objectives aligned with the analysis plan; automatic collection from the Ultrahuman Partner API, Apple Health and an Amazon Smart Air Quality Monitor; indoor air quality added as exploratory factors; the carry-over parameter allowed to take either sign, so that hypothesis 5 can be tested (model version ordinal-ar1-stan-v3); decision rules, the analysis of the secondary outcome, a design analysis and a safety rule added; submitted for review by two AI models (Section 3.4). |
+
+## Abstract
+
+**Introduction:** Most of what is known about mood and well-being comes from comparisons between people, which need not describe how mood varies within one person. This N-of-1 study estimates, for one person, which daily factors go with momentary mood, and prepares randomized N-of-1 experiments to test the most promising ones.
+
+**Methods and analysis:** For 12 months, the participant rates momentary mood three times a day on three ordered levels (Sad, Meh, Happy) and rates each day in the evening (0 to 10). Sleep, overnight physiology and activity come automatically from an Ultrahuman Ring and Apple Health; weather, outdoor air quality and indoor air quality are also collected automatically; screen time, social contact, caffeine, alcohol and context are optional evening entries. A Bayesian cumulative logit model with time of day and weekday effects, a latent daily mood that follows a stationary first-order autoregressive process, and factors under a hierarchical shrinkage prior is refitted as data arrive. Factors enter only with information available before the reports they predict. Five directional hypotheses are judged at 12 months, with an interim look at 6 months, by a prespecified posterior probability rule; everything else is exploratory.
+
+**Ethics and dissemination:** This is self-experimentation with no other person's data. All data stay on the participant's computer; only model estimates are published, as they update, together with this protocol and the record of its review.
+
+## 1. Introduction
+
+### 1.1 Background and Rationale
+
+Well-being research has mostly compared people with each other (Diener et al., 2017). Associations found between people describe a population and need not hold within any one person, whose mood may respond to sleep, activity, company or weather in ways the average hides (Molenaar, 2004; Hamaker, 2012). A person who wants to know what goes with their own mood therefore needs repeated measurements of themselves, analyzed as the time series of one person.
+
+Two developments make such a study practical. Ecological momentary assessment records experience as it happens, which reduces recall bias (Shiffman et al., 2008; Stone et al., 2002), and consumer wearables record sleep, heart rate and activity passively, although their accuracy varies by metric and device (Evenson et al., 2015; de Zambotti et al., 2019; Chinoy et al., 2021). Self-tracking is widespread (Li et al., 2010; Swan, 2013), but it rarely comes with a prespecified analysis that handles ordinal ratings, autocorrelation, missing values and the order of events in time.
+
+This study applies the standards of N-of-1 research to self-tracking (Kravitz et al., 2014; Porcino et al., 2020). Outcomes, factors, timing rules, the model, hypotheses and decision rules are fixed in this protocol before any model is fitted to the study data. Associations from the observational phase rank candidate factors, and randomized N-of-1 experiments then test those the participant can change (Vohra et al., 2015). Bayesian methods suit this setting because they quantify uncertainty directly, handle missing values within the model and allow the estimates to be updated as data accumulate (Gelman et al., 2013).
+
+### 1.2 Objectives
+
+The primary objective is to estimate, in one person, the associations between daily factors and momentary mood, and to test five directional hypotheses (Section 1.3).
+
+The secondary objectives are:
+
+1. to estimate the same associations for the evening rating of the day (day satisfaction);
+2. to estimate mood dynamics, meaning the carry-over of mood from one day to the next and the size of day-to-day fluctuations, and the differences in mood by time of day and weekday;
+3. to rank the factors the participant can change as candidates for randomized N-of-1 experiments, and to run those experiments (Section 2.10);
+4. to assess feasibility: adherence to the mood prompts and the completeness of each data source over 12 months.
+
+The study also provides open, privacy-preserving software for self-studies of this kind.
+
+### 1.3 Hypotheses
+
+Five directional hypotheses about the primary outcome are confirmatory. They are judged by the rule in Section 2.9.5.
+
+1. H1: Longer sleep last night goes with higher mood.
+2. H2: More steps yesterday go with higher mood.
+3. H3: More screen time yesterday (H3a), and more social media time yesterday (H3b), go with lower mood.
+4. H4: More time in person with friends or family yesterday goes with higher mood.
+5. H5: Mood carries over from one day to the next (φ > 0 in Section 2.9.1).
+
+## 2. Methods
+
+### 2.1 Study Design
+
+This is a single-subject (N-of-1), intensive longitudinal observational study with continuous data collection, analyzed idiographically: the target of inference is the within-person process of one individual, not a population (Molenaar, 2004; Hamaker, 2012). Randomized N-of-1 experiments follow the observational phase (Section 2.10). The protocol follows the items of the SPIRIT 2025 statement (Chan et al., 2025) and its N-of-1 extension (Porcino et al., 2020) that apply to an observational N-of-1 study; the experiments will be reported following CENT 2015 (Vohra et al., 2015).
+
+Data collection runs for 12 months, so that seasonal variation in day length and temperature can be separated from the other factors. The confirmatory hypotheses are judged at 12 months, with an interim look at 6 months (Section 2.9.10). Because the design is observational, the primary analysis estimates associations conditional on the measured factors; causal claims are left to the experiments.
+
+### 2.2 Participant and Setting
+
+The participant is one adult, the investigator, in their ordinary daily life. There are no other eligibility criteria and no recruitment. The study tests no treatment and involves no clinical population. The participant knows the hypotheses and can see the estimates as they update, which Section 4.2 discusses.
+
+### 2.3 Outcomes
+
+#### 2.3.1 Primary Outcome: Momentary Mood
+
+The primary outcome is a single momentary mood report on three ordered levels: 1 (Sad), 2 (Meh) and 3 (Happy). The item measures momentary affect, the emotional quality of the present moment, rather than life evaluation; the two are distinct components of subjective well-being with different correlates (Kahneman & Deaton, 2010; Diener et al., 2017). It is not a validated instrument. Three levels keep the burden low enough for a year of use at the cost of resolution, so floor and ceiling effects are likely. The responses are analyzed as ordinal, because treating ordinal responses as interval scaled can distort effect estimates and even reverse their sign (Liddell & Kruschke, 2018; Bürkner & Vuorre, 2019).
+
+Reports are made in a web app on the phone's Home Screen: one tap per report, with an optional free-text note in which words marked with # become tags. Each report stores the moment it was made (taken on the phone, so a report made while the server is unreachable keeps its true time), the phone's time zone, the moment the server received it, and a unique client identifier that makes retries idempotent. Reports are never edited; a mistaken report is deleted.
+
+Each report is assigned to a study day and a time-of-day slot in the local time zone at the moment of the report, so travel across time zones is handled. The study day runs from 4 AM to 4 AM, so a report at 1 AM belongs to the previous evening. Slots are morning (4 AM to noon), afternoon (noon to 6 PM) and evening (6 PM to 4 AM). The target is one report per slot per day; additional reports are kept and analyzed.
+
+Reminders are fixed-time phone automations, one per slot. Fixed schedules can couple mood with the activities habitually done at those moments; signal-contingent random prompting (Killingsworth & Gilbert, 2010; Myin-Germeys et al., 2018) is the stronger design and can replace the fixed schedule later without changes to the analysis. Retrospective entry, a known source of bias in diary studies (Stone et al., 2002), is limited: the app stamps each report at the moment of the tap, the programming interface accepts earlier times only up to 14 days back (for reports queued on the phone) and rejects anything older, and the delay between report and receipt is stored so that late entries can be excluded in a sensitivity analysis.
+
+#### 2.3.2 Secondary Outcomes
+
+Day satisfaction: once each evening, "All things considered, how satisfied were you with today?" on a 0 to 10 scale. This single item evaluates the day as a whole and is the closest daily analogue of life evaluation; single-item life satisfaction measures show acceptable reliability and validity (Lucas & Donnellan, 2012; Cheung & Lucas, 2014), although those studies concern global rather than daily judgments.
+
+Mood dynamics: the carry-over of mood from one day to the next (the autoregressive parameter, an index of emotional inertia; Kuppens et al., 2010) and the size of day-to-day fluctuations, both estimated by the primary model, together with the model-adjusted differences by time of day and weekday.
+
+#### 2.3.3 Process Measures
+
+Adherence is the share of slots with at least one report, per week, and is reported alongside every result. Completeness is the share of study days with a value for each factor, by data source.
+
+### 2.4 Factors and Data Sources
+
+| Domain | Factor | Unit | Source | Collection | Enters the model as |
+|---|---|---|---|---|---|
+| Sleep and physiology | Sleep duration | hours | Ultrahuman Ring, through the Ultrahuman Partner API or Apple Health | automatic | last night |
+| | Sleep efficiency | % | as above | automatic | last night |
+| | Heart rate variability | ms | as above; one metric for the whole study | automatic | last night |
+| | Resting heart rate | beats/min | as above | automatic | last night |
+| | Skin temperature deviation | °C | Ultrahuman Partner API; otherwise the evening log | automatic with API access | last night |
+| Activity | Steps | count | Ultrahuman Partner API, or iPhone and Apple Watch through Apple Health | automatic | yesterday |
+| | Exercise | min | Apple Health exercise minutes (Apple Watch) | automatic | yesterday |
+| | Time outdoors | min | Apple Health time in daylight (Apple Watch); otherwise the evening log | automatic with a watch | yesterday |
+| Social | Time in person with friends or family | min | evening log | manual, optional | yesterday |
+| Digital | Screen time; social media time | min | iPhone Screen Time, copied into the evening log | manual, optional | yesterday |
+| Intake | Caffeine | mg | evening log, or Apple Health if logged there | manual, optional | yesterday |
+| | Alcohol | standard drinks | evening log, or Apple Health if logged there | manual, optional | yesterday |
+| Context | Work day; away from home; sick | yes/no | evening log | manual, optional | same day |
+| Outdoor environment | Mean temperature; precipitation; sunshine; day length | °C; mm; h; h | Open-Meteo (reanalysis and forecast models) | automatic | same day |
+| | Outdoor PM2.5 | µg/m³ | Open-Meteo air quality (CAMS) | automatic | same day |
+| Indoor environment | Indoor PM2.5; volatile organic compounds | µg/m³; index | Amazon Smart Air Quality Monitor, through the Alexa web service | automatic | yesterday (daily mean) |
+| Moment | Tags in the report's note | presence | mood report | manual, optional | descriptive only |
+
+The factors cover mechanisms with prior evidence: sleep, autonomic function measured by heart rate variability (Thayer & Lane, 2009), physical activity, social connection (Holt-Lunstad et al., 2010), social media use (Hunt et al., 2018; Primack et al., 2017), seasonal light (Rosenthal et al., 1984), and air pollution (Power et al., 2015). Time of day and weekday enter the model as effects of their own, because mood follows daily and weekly rhythms (Roenneberg et al., 2003).
+
+Timing rule: a factor enters with information available before the reports it predicts. Sleep and overnight physiology describe the night that ended on the morning of the study day. Behavior that accumulates during the day (steps, exercise, time outdoors, screen time, caffeine, alcohol, social time) can be a consequence of the day's mood as easily as a cause, so it enters as the previous day's value; same-day totals are exploratory (Section 2.9.7). Indoor air depends partly on what the participant does at home, such as cooking, cleaning or opening windows, so it also enters as the previous day's mean. Weather and day length cannot be caused by mood and enter on the same day; the work, travel and sick flags are treated the same way, as context.
+
+Automatic collection: collection is automatic wherever a data source allows it. Ultrahuman grants access to its Partner API on request; with that access, an hourly job on the participant's computer fetches the ring's nightly and daily metrics. Until access is granted, and for exercise and time in daylight in any case, a daily iPhone automation reads Apple Health, to which the ring's app writes its data, and posts the values. The same hourly job fetches weather for complete days and reads the indoor air monitor's current values through the Alexa web service. Amazon offers no public interface for the monitor, so the connector uses the unofficial interface that home automation software uses, and it can stop working when Amazon changes its service. Indoor readings are sampled hourly while the computer is awake; a day's mean is recorded only when at least 12 hours of that day were sampled. The connectors for the Ultrahuman Partner API and the Amazon monitor are being added to the software, together with the database columns and model rows for the two indoor factors.
+
+Screen time and social media time have no programming interface on the iPhone, and time with people, caffeine, alcohol and the context flags have no sensor. They are optional entries in the evening log (caffeine and alcohol can also come from Apple Health if logged there), and they enter the model only when recorded often enough (Section 2.9.3).
+
+Wearable measurement: consumer sleep trackers detect sleep well but wake poorly when compared with polysomnography (epoch-by-epoch specificity 0.18 to 0.54 across seven devices; Chinoy et al., 2021), and their proprietary algorithms change with firmware updates (de Zambotti et al., 2019). Among wearable metrics, step counts are the most valid and sleep and energy expenditure the least (Evenson et al., 2015). A PubMed search in September 2026 found no independent validation of the Ultrahuman Ring against polysomnography or electrocardiography; the indexed studies are by the manufacturer. Device values are therefore treated as noisy proxies, with two rules. First, the source chosen for each factor when data collection starts is kept for the whole study; Apple Health stores heart rate variability as SDNN while ring apps usually report RMSSD, and the two are not interchangeable. If Partner API access is granted after the start, switching a factor to it is a protocol amendment (Section 3.4) and is modeled as a break. Second, device, app or firmware changes are noted in the daily log so that they can be modeled as breaks.
+
+Not collected, although listed in the first version of this protocol: smart scale body composition, YouTube and YouTube Music history (watch history is not available through the YouTube Data API; a Google Takeout import is possible later), and calendar or location traces (left out for privacy).
+
+### 2.5 Participant Timeline
+
+| When | What | How |
+|---|---|---|
+| Three times a day | Momentary mood | Phone reminder in each slot; one tap |
+| Each evening | Day satisfaction; optional factors; notes | Evening log in the app |
+| Each night | Sleep and overnight physiology | Ring, automatic |
+| Each day | Apple Health values | iPhone automation, automatic |
+| Each hour | Ultrahuman metrics, weather, indoor air; model refit when the data have changed; public estimates | Scheduled job on the computer, automatic |
+| Each day | Encrypted backup | Scheduled job, automatic |
+| Weeks 1 and 2 | Pilot checks (Section 2.11) | Participant |
+| Each month | Review of adherence, completeness, connector errors and the safety rule | Participant |
+| Month 6 | Interim confirmatory analysis | Participant |
+| Month 12 | Final confirmatory, secondary and sensitivity analyses | Participant |
+| After month 12 | Embedded N-of-1 experiments | Participant |
+
+### 2.6 Sample Size and Study Length
+
+Study length is set by precision rather than by a significance test. With three prompts a day and about 80% of them answered, six months yield about 430 reports on 180 days and twelve months about 870 reports on 365 days.
+
+A simulation study (`analysis/design.R` in the study software) generates data from the model with known effects of 0.5, 0.3, 0.3, 0.2 and 0 on the log-odds scale per standard deviation of the factor, together with 14 factors without effect, so that the shared shrinkage prior works among about as many factors as the real study has; it then fits the model to 50 simulated studies of 180 days and 50 of 365 days, and records how often the posterior probability of the true direction reaches 0.975, how often a null factor crosses that threshold, and the coverage and width of the 95% intervals. Its results will replace this sentence in the next version. In two earlier single simulations of 120 days, every true effect fell inside its 95% credible interval; an effect of 0.5 was distinguished from zero in both, an effect of 0.3 in some cases but not others, and an effect of 0.2 in neither.
+
+### 2.7 Data Collection Infrastructure
+
+The study software is a local web application (TypeScript on Node.js, using its built-in SQLite in write-ahead logging mode) running on the participant's own computer as background services; the statistical analysis runs separately in R and only reads the database. The database, logs, encrypted backups and posterior draws live in a private folder outside the code repository, and the disk is encrypted with FileVault.
+
+The server listens on the loopback interface only. The phone reaches it through Tailscale Serve, which limits access to the participant's own devices over WireGuard. The web interface requires a password, locks sign in after repeated failures, and sends a strict Content Security Policy with no third-party scripts. Phone shortcuts authenticate with device tokens that are stored as hashes and can only add data, never read it.
+
+The rating page caches itself on the phone and keeps reports in a local queue until the server confirms them, so reports made while the computer sleeps or the phone is offline are sent later with their original time. Only the fields present in a daily submission change, so the automatic sources and the evening log never overwrite each other.
+
+### 2.8 Data Management and Quality
+
+Every field has a plausible range enforced by the database (for example, sleep between 0 and 24 hours); implausible device values are corrected or left blank in the daily log rather than silently dropped. Reports are never edited, only deleted. The hourly job logs every failed fetch, and the monthly review checks each source's completeness. A GPG-encrypted backup of the database is written once a day and the last 30 are kept. The data belong to the participant and are kept for as long as the participant chooses.
+
+### 2.9 Statistical Analysis Plan
+
+#### 2.9.1 Model
+
+For report i, made on study day d in slot s and weekday w, with y = 1 (Sad), 2 (Meh) or 3 (Happy):
+
+$$
+\begin{aligned}
+\Pr(y_i \le k) &= \operatorname{logit}^{-1}(c_k - \eta_i), \quad k = 1, 2 \\
+\eta_i &= \alpha_s + \gamma_w + \mathbf{x}_d^{\top} \boldsymbol{\beta} + u_d \\
+u_d &= \phi \, u_{d-1} + \sigma \varepsilon_d, \quad \varepsilon_d \sim \mathrm{N}(0, 1)
+\end{aligned}
+$$
+
+The cumulative logit likelihood respects the ordinal outcome (Bürkner & Vuorre, 2019). The latent daily mood u follows a stationary first-order autoregressive process over every calendar day from the first report to the last, started from its stationary distribution, so reports on the same day share a day effect, mood can carry over between days, and days without reports keep their place in time. Time of day (α) and weekday (γ) effects are constrained to sum to zero, and the cutpoints absorb the intercept.
+
+#### 2.9.2 Priors
+
+The cutpoints have normal priors with means -1 and 1 and standard deviation 1.5 and are constrained to be ordered; α and γ are sum-to-zero vectors whose elements have normal(0, 0.5) priors; (φ + 1)/2 ~ Beta(2, 2), which keeps φ between -1 and 1 with a prior symmetric around zero, so that the direction of carry-over is estimated rather than assumed; σ ~ HalfNormal(1); and β_j = τ z_j with z_j ~ N(0, 1) and τ ~ HalfNormal(0.5). The factors are standardized, so the shared scale τ partially pools the magnitudes of all effects: a simple hierarchical shrinkage prior, a milder relative of the regularized horseshoe (Piironen & Vehtari, 2017). The priors are weakly informative on the log-odds scale in the sense of Gelman et al. (2017).
+
+#### 2.9.3 Factors and Missing Data
+
+Factors follow the timing rule in Section 2.4 and are standardized over the days with reports. A factor recorded on fewer than half of the days with reports, or on fewer than 10 such days, is left out of the model until it has more data, and the reason is shown with the results; this applies above all to the optional manual factors. Remaining gaps are imputed inside the model as N(0, 1) parameters on the standardized scale, which assumes that the values are missing at random (Rubin, 1976; Graham, 2009) and treats the missing values of different factors as independent of each other.
+
+Unanswered prompts are not imputed: the likelihood uses the reports that were made. If prompts are skipped more often in bad moods, average mood is overestimated; effect estimates are biased only insofar as skipping also depends on the factors. Adherence by slot and weekday is monitored, and missing device values (for example, a ring not worn on a bad night) are examined for dependence on mood.
+
+#### 2.9.4 Estimands
+
+For each factor: (a) the odds ratio per natural unit, such as one hour of sleep, 1,000 steps or one hour of screen time; (b) the average predictive comparison: the mean change, over all observed reports, in the probability of a Happy report (and of a Sad report) when the factor is one unit higher and everything else is as observed; and (c) the posterior probability of the direction of the effect. Time of day and weekday effects are reported as model-adjusted probabilities of a Happy report. Point estimates are posterior medians with 95% equal-tailed credible intervals.
+
+#### 2.9.5 Confirmatory Analysis and Decision Rule
+
+Each hypothesis in Section 1.3 is judged by the posterior probability that its effect has the predicted direction (for H5, the probability that φ > 0): supported if that probability is at least 0.975, contradicted if it is at most 0.025, and inconclusive otherwise. H3a and H3b are judged separately; because social media time is part of screen time and both are in the model, H3a concerns screen time other than social media. A hypothesis whose factor is left out of the model at the time of the analysis (Section 2.9.3) is reported as not testable. The rule is applied at 6 months (interim) and at 12 months (final), and the 12-month result is the conclusion. The design analysis (Section 2.6) estimates how often a factor without effect crosses the threshold. Results are reported with their full posterior summaries, not only the category.
+
+#### 2.9.6 Secondary Outcome: Day Satisfaction
+
+Day satisfaction is analyzed at 6 and 12 months, not continuously, with a cumulative logit model for its 11 levels: ten ordered cutpoints with normal(0, 3) priors, the same weekday effects, factors, timing rules and shrinkage prior as the primary model, and a latent AR(1) day effect. With one rating per day, the day effect is identified only through its autocorrelation, so the carry-over parameter of this model is interpreted with caution. No hypothesis is tested on this outcome. The model will be implemented and checked on simulated data before the 6-month analysis.
+
+#### 2.9.7 Exploratory Analyses
+
+Everything else is exploratory: the factors outside the hypotheses (including indoor air quality), same-day totals of the behavioral factors in place of the lagged values, lags of two days, the interaction of sleep with work days, a comparison of the estimates from the first and the last six months (for adaptation or seasonal change), and the tag associations. They are run at 6 and 12 months, except the tag associations, which update with every refit. Exploratory results are described by the same posterior probability of direction: strong at 0.975 or more, moderate at 0.90, weak at 0.75. Shrinkage through τ guards partly against false positives, but with about twenty factors some moderate findings will be chance (Yarkoni & Westfall, 2017); they are candidates for experiments, not conclusions.
+
+#### 2.9.8 Computation and Diagnostics
+
+The model is written in Stan (Carpenter et al., 2017) and fitted from R with cmdstanr (Gabry et al., 2025) using the No-U-Turn sampler: four chains of 1,000 draws after 1,000 warmup iterations, with a target acceptance rate of 0.95. Draws are summarized with the posterior package (Bürkner et al., 2026). A fit is used only if the largest rank-normalized R-hat is below 1.01, the bulk effective sample size of every reported parameter exceeds 400, and there are no divergent transitions (Vehtari et al., 2021); otherwise it is flagged. Model adequacy is checked with posterior predictive checks of the category frequencies, overall and by slot, and predictive accuracy with Pareto-smoothed importance sampling leave-one-out cross-validation and its Pareto k diagnostics (Vehtari et al., 2017). Leave-one-out cross-validation predicts a held-out report from all other reports, including later ones, so it is used to compare model variants and not as a measure of forecasting accuracy. Parameter recovery on simulated data with known effects is part of the software's test suite.
+
+#### 2.9.9 Sensitivity Analyses
+
+Planned for the confirmatory analysis: (1) a tighter and a wider shared prior scale, τ ~ HalfNormal(0.25) and HalfNormal(1); (2) excluding reports received more than two hours after they were made; (3) complete-case analysis of the confirmatory factors instead of imputation; (4) same-day instead of lagged behavior; (5) adding a linear trend in study time; (6) excluding the first two weeks, the pilot and the period of strongest reactivity; and (7) a metric model of the same data, only to show how much the ordinal treatment matters. Sensitivity analyses are reported alongside the confirmatory results and do not change the decision rule.
+
+#### 2.9.10 Continuous Updating and Interim Looks
+
+The model is refitted on all data whenever the data change, at most hourly. Each fit is a complete Bayesian update, not a sequential approximation. Estimates before 6 months are descriptive and always come with the number of reports and days; the decision rule is applied only at 6 and 12 months. Because the estimates are published as they update (Section 3.2), every change to the model specification gets a new model version string, shown with the published results, and a dated entry in the revision history.
+
+#### 2.9.11 Descriptive Analyses
+
+Weekly shares of Happy and Sad reports, shares by slot and by weekday, and tag associations (the difference in the share of Happy reports with and without a tag, with Beta(1, 1) posteriors recomputed at every refit) are shown on the participant's private dashboard, together with a one-day forecast. They are unadjusted; tag associations are same-moment, so a tag can be a cause of mood or a consequence of it. The forecast is a convenience for the participant, and its accuracy is not an objective of this study.
+
+### 2.10 Embedded N-of-1 Experiments
+
+After the 12-month analysis, the factors under the participant's control with the strongest associations become candidates for randomized N-of-1 experiments, for example caffeine after noon, a morning walk, or an evening without social media. Each experiment gets a dated amendment to this protocol before it starts, specifying the intervention and control conditions, the block design (for example, pairs of days with the order randomized within each pair), the number of blocks, a washout if carry-over is expected, the outcome window (the day's mood reports, and the next day's for factors that act through sleep) and the analysis. Allocation follows a random sequence generated and stored before the experiment starts and revealed each morning. The assignment is recorded in the daily log (a dedicated field will be added before the first experiment) and enters the model as a predictor of the reports in its outcome window; its posterior is the estimated effect. Design and reporting follow the N-of-1 guidance (Kravitz et al., 2014; Porcino et al., 2020) and CENT 2015 (Vohra et al., 2015); micro-randomized trials are the model for momentary interventions (Klasnja et al., 2015).
+
+### 2.11 Monitoring, Harms and Stopping
+
+Monitoring: in the first two weeks (the pilot), the participant checks the reminders, the automatic data flows and the evening log; the model starts once there are 30 reports on 14 different days. Afterwards, a monthly review checks adherence (target: at least 80% of slots answered), the completeness of each data source, the connectors' error log and the backups; problems and their dates are recorded in the daily log's notes. If adherence falls below 50% for two consecutive weeks, the reminder times and the burden of the evening log are reviewed. Changes that affect the analysis go through the amendment process (Section 3.4).
+
+Harms: the observational phase involves no intervention. Close attention to one's own mood can increase rumination, and the data may reveal a period of low mood. Safety rule: if more than half of the reports in any 14-day period are Sad, or the evening rating is 3 or lower on at least 7 of 14 consecutive days, the participant will contact a family physician or a mental health professional; in a crisis, the participant will call a crisis line (988 in Canada and the United States) or emergency services. The study is always secondary to health and care and can be paused at any time. Experiments use only everyday, low-risk changes and never medication; an experiment stops early if the intervention causes distress or harm, such as persistent caffeine withdrawal headaches, or if the safety rule is met.
+
+Stopping: the participant can stop the study at any time. If the study stops before 12 months, the confirmatory analysis is run on the data available and reported as such.
+
+### 2.12 Timeline
+
+Phase 1, infrastructure (September 2026): the software described in Sections 2.7 and 2.8, with automated tests and a simulation-based check of the model.
+
+Phase 2, pilot (the first two weeks of data collection): checks of the reminders, adherence, the automatic data flows and the evening log.
+
+Phase 3, data collection (months 1 to 12), with the interim analysis at 6 months and a monthly review.
+
+Phase 4, final analysis at 12 months, with the sensitivity analyses in Section 2.9.9, followed by experiments on the most promising factors (Section 2.10).
+
+## 3. Ethics and Dissemination
+
+### 3.1 Ethics
+
+This is self-experimentation: the participant designs the study, collects the data and analyzes them, and no other person's data are involved. Institutional review is generally not required for self-experimentation of this kind, but requirements differ between institutions and journals and should be checked before any results are submitted for publication.
+
+### 3.2 Privacy and Data Governance
+
+All study data stay on the participant's computer (Section 2.7). Data leave it in only three ways. The location, rounded to about one kilometer, is sent to Open-Meteo to request weather. The software requests the participant's own data from Ultrahuman and Amazon, which already hold them, using access tokens stored in the private data folder, and sends those services nothing else. A fixed set of model estimates is published on a public web page: the effect estimates with their credible intervals, the model-adjusted probabilities by time of day and weekday, the mood dynamics parameters, convergence diagnostics, the model version, and the number of reports and days. Reports, notes, tags, daily values, indoor air readings, daily model estimates and forecasts are never published, and an automated test fails if any other field appears in the published file. Publishing interim estimates is a deliberate commitment to transparency; its cost is that interim noise is public, which is why interim results are descriptive (Section 2.9.10).
+
+The participant can export all data as CSV or JSON, or delete them, at any time from the application. Backups are encrypted with a key that only the participant holds. A lost phone is handled by revoking its device token, which could only add data, and by changing the password. The Amazon connector's token can act on the participant's Amazon account, so it is stored with the same protection as the database and can be revoked from the account's device list (Nebeker et al., 2019).
+
+### 3.3 Dissemination and Open Science
+
+The results page publishes the estimates listed in Section 3.2 as they update. This protocol, its revision history and the record of its review are published on the same site. After the 12-month analysis, a report of the confirmatory, secondary and sensitivity analyses will be posted there and may be submitted as a preprint or article. Individual data are not shared, for privacy. The study software, including the Stan model and the R analysis code, is kept under version control; every published estimate carries its model version, and the code can be shared on request.
+
+### 3.4 Protocol Amendments and Review
+
+Any change to the outcomes, factors, data sources, model, hypotheses or decision rules gets a new protocol version, with its date, the change and the reason in the revision history, published before the change takes effect in the analysis; model changes also get a new model version string. Version 3.0 is being reviewed by two AI models, GPT-6-Astra (OpenAI, through the Codex command line tool) and Grok 4.6 (xAI, through the Grok command line tool), in rounds until both are satisfied. Their reports, the responses and each reviewed version are published with the protocol. Review by AI models is not peer review by human experts.
+
+## 4. Discussion
+
+### 4.1 Strengths
+
+Outcomes, factors, timing rules, the model, the hypotheses and the decision rules are fixed before any model is fitted to the study data, and every change is versioned and public. The ordinal likelihood, the latent autoregressive day effect and the lagged behavioral factors address three common problems of self-tracking analyses: metric treatment of ordinal ratings, autocorrelation, and reverse causation from same-day behavior. Automatic collection keeps the daily burden to three taps and an optional evening entry for a year. Embedded experiments turn associations into causal tests where the participant can change the factor. Only estimates are published.
+
+### 4.2 Limitations
+
+The findings describe one person and say nothing about anyone else; generalizing them would need replication across people (Kazdin, 2011). The primary outcome is a single, unvalidated three-level item: it gives coarse resolution, and a participant who rarely uses the extreme levels leaves little information about what moves mood within the middle category. Wearable metrics come from proprietary algorithms that change with software updates.
+
+The associations are observational. Unmeasured factors can confound them, and behavior measured on the same day as mood is often a consequence of mood rather than a cause, which is why it enters with a one-day lag. The lag reduces but does not remove reverse causation, because yesterday's behavior may reflect a mood that persists into today, a path the autoregressive latent mood only partly absorbs.
+
+Missing values are assumed to be missing at random. That is doubtful for prompts skipped on bad days, for optional entries made on some days and not others, and for indoor air readings, which are missing while the computer sleeps or when Amazon's unofficial interface fails.
+
+The participant is not blind: they know the hypotheses and can see the estimates as they update, so expectations can shape the ratings. Self-monitoring can itself change mood and behavior (reactivity), most strongly in the first weeks. Fixed reminder times can tie mood reports to habitual moments. With about twenty factors, some exploratory associations will be chance findings despite the shrinkage prior. Publishing estimates as they update exposes interim noise and invites premature conclusions; the decision rule is therefore applied only at 6 and 12 months. Finally, the protocol was reviewed by AI models rather than by human experts.
+
+## References
+
+Bürkner, P.-C., & Vuorre, M. (2019). Ordinal regression models in psychology: A tutorial. *Advances in Methods and Practices in Psychological Science*, 2(1), 77-101.
+
+Bürkner, P.-C., Gabry, J., Kay, M., & Vehtari, A. (2026). *posterior: Tools for working with posterior distributions* (R package version 1.7.1). https://mc-stan.org/posterior/
+
+Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., Brubaker, M., Guo, J., Li, P., & Riddell, A. (2017). Stan: A probabilistic programming language. *Journal of Statistical Software*, 76(1), 1-32.
+
+Chan, A.-W., Boutron, I., Hopewell, S., Moher, D., Schulz, K. F., Collins, G. S., et al. (2025). SPIRIT 2025 statement: Updated guideline for protocols of randomised trials. *BMJ*, 389, e081477. https://doi.org/10.1136/bmj-2024-081477
+
+Cheung, F., & Lucas, R. E. (2014). Assessing the validity of single-item life satisfaction measures: Results from three large samples. *Quality of Life Research*, 23(10), 2809-2818.
+
+Chinoy, E. D., Cuellar, J. A., Huwa, K. E., Jameson, J. T., Watson, C. H., Bessman, S. C., Hirsch, D. A., Cooper, A. D., Drummond, S. P. A., & Markwald, R. R. (2021). Performance of seven consumer sleep-tracking devices compared with polysomnography. *Sleep*, 44(5), zsaa291.
+
+de Zambotti, M., Cellini, N., Goldstone, A., Colrain, I. M., & Baker, F. C. (2019). Wearable sleep technology in clinical and research settings. *Medicine and Science in Sports and Exercise*, 51(7), 1538-1557.
+
+Diener, E., Heintzelman, S. J., Kushlev, K., Tay, L., Wirtz, D., Lutes, L. D., & Oishi, S. (2017). Findings all psychologists should know from the new science on subjective well-being. *Canadian Psychology*, 58(2), 87-104.
+
+Evenson, K. R., Goto, M. M., & Furberg, R. D. (2015). Systematic review of the validity and reliability of consumer-wearable activity trackers. *International Journal of Behavioral Nutrition and Physical Activity*, 12, 159.
+
+Gabry, J., Češnovar, R., Johnson, A., & Bronder, S. (2025). *cmdstanr: R interface to CmdStan* (R package version 0.9.0). https://mc-stan.org/cmdstanr/
+
+Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2013). *Bayesian data analysis* (3rd ed.). CRC Press.
+
+Gelman, A., Simpson, D., & Betancourt, M. (2017). The prior can often only be understood in the context of the likelihood. *Entropy*, 19(10), 555.
+
+Graham, J. W. (2009). Missing data analysis: Making it work in the real world. *Annual Review of Psychology*, 60, 549-576.
+
+Hamaker, E. L. (2012). Why researchers should think "within-person": A paradigmatic rationale. In M. R. Mehl & T. S. Conner (Eds.), *Handbook of research methods for studying daily life* (pp. 43-61). Guilford Press.
+
+Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine*, 7(7), e1000316.
+
+Hunt, M. G., Marx, R., Lipson, C., & Young, J. (2018). No more FOMO: Limiting social media decreases loneliness and depression. *Journal of Social and Clinical Psychology*, 37(10), 751-768.
+
+Kahneman, D., & Deaton, A. (2010). High income improves evaluation of life but not emotional well-being. *Proceedings of the National Academy of Sciences*, 107(38), 16489-16493.
+
+Kazdin, A. E. (2011). *Single-case research designs: Methods for clinical and applied settings* (2nd ed.). Oxford University Press.
+
+Killingsworth, M. A., & Gilbert, D. T. (2010). A wandering mind is an unhappy mind. *Science*, 330(6006), 932.
+
+Klasnja, P., Hekler, E. B., Shiffman, S., Boruvka, A., Almirall, D., Tewari, A., & Murphy, S. A. (2015). Microrandomized trials: An experimental design for developing just-in-time adaptive interventions. *Health Psychology*, 34(Suppl), 1220-1228.
+
+Kravitz, R. L., Duan, N., & the DEcIDE Methods Center N-of-1 Guidance Panel (Eds.). (2014). *Design and implementation of N-of-1 trials: A user's guide* (AHRQ Publication No. 13(14)-EHC122-EF). Agency for Healthcare Research and Quality.
+
+Kuppens, P., Allen, N. B., & Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. *Psychological Science*, 21(7), 984-991.
+
+Li, I., Dey, A., & Forlizzi, J. (2010). A stage-based model of personal informatics systems. *Proceedings of the SIGCHI Conference on Human Factors in Computing Systems*, 557-566.
+
+Liddell, T. M., & Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong? *Journal of Experimental Social Psychology*, 79, 328-348.
+
+Lucas, R. E., & Donnellan, M. B. (2012). Estimating the reliability of single-item life satisfaction measures: Results from four national panel studies. *Social Indicators Research*, 105(3), 323-331.
+
+Molenaar, P. C. (2004). A manifesto on psychology as idiographic science: Bringing the person back into scientific psychology, this time forever. *Measurement*, 2(4), 201-218.
+
+Myin-Germeys, I., Kasanova, Z., Vaessen, T., Vachon, H., Kirtley, O., Viechtbauer, W., & Reininghaus, U. (2018). Experience sampling methodology in mental health research: New insights and technical developments. *World Psychiatry*, 17(2), 123-132.
+
+Nebeker, C., Torous, J., & Bartlett Ellis, R. J. (2019). Building the case for actionable ethics in digital health research supported by artificial intelligence. *BMC Medicine*, 17, 137.
+
+Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. *Electronic Journal of Statistics*, 11(2), 5018-5051.
+
+Porcino, A. J., Shamseer, L., Chan, A.-W., Kravitz, R. L., Orkin, A., Punja, S., Ravaud, P., Schmid, C. H., Vohra, S., & the SPENT group. (2020). SPIRIT extension and elaboration for n-of-1 trials: SPENT 2019 checklist. *BMJ*, 368, m122. https://doi.org/10.1136/bmj.m122
+
+Power, M. C., Kioumourtzoglou, M. A., Hart, J. E., Okereke, O. I., Laden, F., & Weisskopf, M. G. (2015). The relation between past exposure to fine particulate air pollution and prevalent anxiety: Observational cohort study. *BMJ*, 350, h1111.
+
+Primack, B. A., Shensa, A., Sidani, J. E., Whaite, E. O., Lin, L. Y., Rosen, D., Colditz, J. B., Radovic, A., & Miller, E. (2017). Social media use and perceived social isolation among young adults in the U.S. *American Journal of Preventive Medicine*, 53(1), 1-8.
+
+Roenneberg, T., Wirz-Justice, A., & Merrow, M. (2003). Life between clocks: Daily temporal patterns of human chronotypes. *Journal of Biological Rhythms*, 18(1), 80-90.
+
+Rosenthal, N. E., Sack, D. A., Gillin, J. C., Lewy, A. J., Goodwin, F. K., Davenport, Y., Mueller, P. S., Newsome, D. A., & Wehr, T. A. (1984). Seasonal affective disorder: A description of the syndrome and preliminary findings with light therapy. *Archives of General Psychiatry*, 41(1), 72-80.
+
+Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3), 581-592.
+
+Shiffman, S., Stone, A. A., & Hufford, M. R. (2008). Ecological momentary assessment. *Annual Review of Clinical Psychology*, 4, 1-32.
+
+Stone, A. A., Shiffman, S., Schwartz, J. E., Broderick, J. E., & Hufford, M. R. (2002). Patient non-compliance with paper diaries. *BMJ*, 324(7347), 1193-1194.
+
+Swan, M. (2013). The quantified self: Fundamental disruption in big data science and biological discovery. *Big Data*, 1(2), 85-99.
+
+Thayer, J. F., & Lane, R. D. (2009). Claude Bernard and the heart-brain connection: Further elaboration of a model of neurovisceral integration. *Neuroscience & Biobehavioral Reviews*, 33(2), 81-88.
+
+Vehtari, A., Gelman, A., & Gabry, J. (2017). Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing*, 27(5), 1413-1432.
+
+Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021). Rank-normalization, folding, and localization: An improved R-hat for assessing convergence of MCMC. *Bayesian Analysis*, 16(2), 667-718.
+
+Vohra, S., Shamseer, L., Sampson, M., Bukutu, C., Schmid, C. H., Tate, R., Nikles, J., Zucker, D. R., Kravitz, R., Guyatt, G., Altman, D. G., & Moher, D. (2015). CONSORT extension for reporting N-of-1 trials (CENT) 2015 statement. *BMJ*, 350, h1738.
+
+Yarkoni, T., & Westfall, J. (2017). Choosing prediction over explanation in psychology: Lessons from machine learning. *Perspectives on Psychological Science*, 12(6), 1100-1122.

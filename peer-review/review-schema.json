@@ -1,0 +1,142 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict",
+    "summary",
+    "prior_points",
+    "must_fix",
+    "should_fix",
+    "minor"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "accept",
+        "revise"
+      ],
+      "description": "accept only if no must_fix point remains."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Overall assessment in a few sentences."
+    },
+    "prior_points": {
+      "type": "array",
+      "description": "Round 2 onward: status of each point from your previous review. Empty in round 1.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "comment"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "resolved",
+              "partly_resolved",
+              "not_resolved"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "must_fix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "section",
+          "problem",
+          "requested_change"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier, for example M1, S1, m1."
+          },
+          "section": {
+            "type": "string",
+            "description": "Protocol section or file the point concerns."
+          },
+          "problem": {
+            "type": "string"
+          },
+          "requested_change": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "should_fix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "section",
+          "problem",
+          "requested_change"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier, for example M1, S1, m1."
+          },
+          "section": {
+            "type": "string",
+            "description": "Protocol section or file the point concerns."
+          },
+          "problem": {
+            "type": "string"
+          },
+          "requested_change": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "minor": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "section",
+          "problem",
+          "requested_change"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier, for example M1, S1, m1."
+          },
+          "section": {
+            "type": "string",
+            "description": "Protocol section or file the point concerns."
+          },
+          "problem": {
+            "type": "string"
+          },
+          "requested_change": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

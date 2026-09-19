@@ -1,0 +1,161 @@
+{
+  "verdict": "accept",
+  "summary": "The three blocking errors are fixed. Pilot reports are excluded from every model once the study start is set; H3 is judged on other screen time and social media time held fixed; and the pre-report claim is limited to last night's sleep and physiology and the previous day's behavior, with same-day weather and evening context named as adjustment covariates. The design analysis, secondary day-satisfaction model, and connector specifications match the revised text. I am satisfied the protocol can be finalized. Remaining items are ordinary: the primary model still imputes the overnight block independently; the confirmatory prior scale is hardcoded, so sensitivity (1) cannot vary it without editing Stan; and an unset study start still lets every report into a fit.",
+  "prior_points": [
+    {
+      "id": "M1",
+      "status": "resolved",
+      "comment": "Pilot and confirmatory collection are separated. load_dataset filters on users.study_start, with a test, and 6- and 12-month analyses count from that date."
+    },
+    {
+      "id": "M2",
+      "status": "resolved",
+      "comment": "When social media time is modeled, screen time is recoded to other screen time. If social media time is dropped, H3a is judged on total screen time and H3b is not testable. Implemented in build_factors with a test."
+    },
+    {
+      "id": "M3",
+      "status": "resolved",
+      "comment": "The pre-report claim is limited to overnight physiology and lagged behavior. Same-day weather and the work, travel, and sick flags are named as adjustment covariates, not confirmatory factors."
+    },
+    {
+      "id": "S1",
+      "status": "resolved",
+      "comment": "Country and private setting, a patient and public involvement statement, a dated public record in place of a registry, and a SPIRIT 2025 map in Appendix B are in. SPENT items for experiments stay with the amendments, as in S12."
+    },
+    {
+      "id": "S2",
+      "status": "resolved",
+      "comment": "Signed effects on every confirmatory factor, 30% evening missingness, and the family-wise support rate are in. They ran 40 studies at 12 months rather than 50, for cost, which is a sound reason."
+    },
+    {
+      "id": "S3",
+      "status": "resolved",
+      "comment": "Appendix A and Section 2.4 specify the Ultrahuman endpoint and date rule, Apple Health alternatives, the unofficial Amazon method and token, VOC as an index, calendar-day indoor means, waking-hour bias, and a Partner API switch as an amendment."
+    },
+    {
+      "id": "S4",
+      "status": "resolved",
+      "comment": "day_satisfaction.stan and secondary.R lock model version day-ordinal-ar1-stan-v2. Days without an evening rating are left out. A change is an amendment."
+    },
+    {
+      "id": "S5",
+      "status": "resolved",
+      "comment": "The estimand is report-level. Sensitivity (8) keeps the first report in each slot."
+    },
+    {
+      "id": "S6",
+      "status": "resolved",
+      "comment": "They declined required evening fields, kept the not-testable rule, stated the aim to complete H3 and H4 every evening, and put 30% evening missingness in the design analysis."
+    },
+    {
+      "id": "S7",
+      "status": "resolved",
+      "comment": "Golder and Macy (2011) supports time of day and weekday. Power et al. (2015) is background on PM2.5 and anxiety, not momentary mood."
+    },
+    {
+      "id": "S8",
+      "status": "resolved",
+      "comment": "Public results replace confirmatory evidence labels with 'judged at 6 and 12 months' and keep intervals and p_positive. The home page headline omits those factors. Covered by a test."
+    },
+    {
+      "id": "S9",
+      "status": "partly_resolved",
+      "comment": "Section 2.9.3 names the overnight block that goes missing together, and sensitivity (7) imputes by chained equations. The primary model still draws independent N(0, 1) values for those five factors."
+    },
+    {
+      "id": "S10",
+      "status": "resolved",
+      "comment": "Complete-case is per confirmatory factor with other factors imputed as usual. The metric model is defined. Same-day behavior is exploratory only."
+    },
+    {
+      "id": "S11",
+      "status": "resolved",
+      "comment": "The repository will be public under GPL-3.0 at the named address when the protocol is finalized. 'On request' is gone."
+    },
+    {
+      "id": "S12",
+      "status": "resolved",
+      "comment": "Experiments are unblinded self-experiments. Version 3.0 fixes the observational phase and the amendment template. Each amendment will cover the SPENT items for periods, sequence, concealment, and washout."
+    },
+    {
+      "id": "S13",
+      "status": "resolved",
+      "comment": "syncWeather uses yesterday in the participant's time zone. Weather is for the home location even on travel days."
+    },
+    {
+      "id": "m1",
+      "status": "resolved",
+      "comment": "Section 2.3.1 now says both timestamps are stored so the delay can be computed."
+    },
+    {
+      "id": "m2",
+      "status": "resolved",
+      "comment": "Section 2.8 matches the hourly job: an encrypted snapshot when about a day has passed, after a GPG recipient is set, last 30 kept."
+    },
+    {
+      "id": "m3",
+      "status": "resolved",
+      "comment": "Section 2.9.3 names a factor that never varies as a reason to drop it."
+    },
+    {
+      "id": "m4",
+      "status": "resolved",
+      "comment": "Weekly slot adherence from the study start is computed and shown on the private Trends page."
+    },
+    {
+      "id": "m5",
+      "status": "resolved",
+      "comment": "Both connectors are implemented. The Amazon path has been checked live; Ultrahuman waits on the Partner API token, with Apple Health until then."
+    },
+    {
+      "id": "m6",
+      "status": "resolved",
+      "comment": "phi is day-to-day carry-over of latent mood, analogous to but not the same as Kuppens et al. emotional inertia."
+    },
+    {
+      "id": "m7",
+      "status": "resolved",
+      "comment": "Section 2.9.8 names the parameters that must pass R-hat and ESS, matching summarize_fit."
+    },
+    {
+      "id": "m8",
+      "status": "resolved",
+      "comment": "Section 2.7 notes that the Tailscale certificate publishes the computer name in public CT logs."
+    }
+  ],
+  "must_fix": [],
+  "should_fix": [
+    {
+      "id": "S20",
+      "section": "2.9.9; software/analysis/mood.stan",
+      "problem": "Sensitivity (1) says the confirmatory factors will be refit with prior standard deviations 0.25 and 1. mood.stan hardcodes those coefficients as 0.5 times beta_z. prior_scale only sets tau, so the confirmatory half of sensitivity (1) cannot be run without editing the locked model.",
+      "requested_change": "Pass the confirmatory scale as data, the same way prior_scale is passed for tau, so 0.25 and 1 do not require a model amendment."
+    },
+    {
+      "id": "S21",
+      "section": "2.11; software/analysis/mood.R; software/server/analysis.ts fingerprint",
+      "problem": "If study_start is unset, load_dataset treats every report as confirmatory data, so a fit can start on the pilot. Changing study_start is not part of the analysis fingerprint, so an existing fit is not redone when the date is set.",
+      "requested_change": "Refuse to fit until study_start is set, and include that date in the fingerprint so a change forces a refit."
+    },
+    {
+      "id": "S22",
+      "section": "2.9.5; software/analysis/mood.R build_factors",
+      "problem": "When social media time is kept, screen time becomes other screen time and is missing wherever either field is missing. Other screen time can then fall under the 50% or 10-day rule while social media time remains, so H3a is dropped and H3b is still tested. The protocol only states the reverse case.",
+      "requested_change": "State that if other screen time is left out while social media time remains, H3a is not testable and H3b is judged on social media time."
+    }
+  ],
+  "minor": [
+    {
+      "id": "m20",
+      "section": "2.6",
+      "problem": "The first design run is said to have had 33 studies per condition at 12 months. The stored files have 33 studies with effects and 32 under the null.",
+      "requested_change": "Report 33 and 32, or say about 33 per condition."
+    },
+    {
+      "id": "m21",
+      "section": "2.3.3; software/server/stats.ts weeklyAdherence",
+      "problem": "For the week in progress, eligible slots are three times the number of calendar days, including slots that have not begun.",
+      "requested_change": "Count only slots whose start has passed, or say the current week is provisional. Completed weeks are already exact."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Personal study data must never be committed.
+*.sqlite3
+*.sqlite3-*
+*.db
+*.gpg
+data/
+backups/
+media/
+logs/
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
+# Local browser QA reports
+.gstack/
+
+# Node
+node_modules/
+*.local.md
+AStudyOnMyself_guide.md

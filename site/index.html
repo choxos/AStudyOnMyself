@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Live results of an N-of-1 Bayesian study of what goes with my daily mood. Estimates only; no data is published.">
+  <title>A Study On Myself: live results</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="./">A Study On Myself</a>
+    <a href="./" aria-current="page">Results</a>
+    <a href="protocol.html">Protocol</a>
+    <a href="review.html">Review record</a>
+  </nav>
+  <main>
+    <h1>A Study On Myself</h1>
+    <p class="muted">Live results of a one-person study of what goes with my mood.</p>
+
+    <section class="card">
+      <p>Three times a day I rate my mood as Sad, Meh or Happy, and I log sleep, activity, screen time, caffeine, alcohol,
+        time with people and a few other things; weather is added automatically. A Bayesian model refits by itself as new reports
+        arrive and this page updates with it.</p>
+      <p><strong>Only the model's estimates are published.</strong> The reports, notes, daily values and anything else
+        from which the data could be reconstructed stay on my own computer.</p>
+      <p id="status" class="muted small">Loading results…</p>
+    </section>
+
+    <div id="results" hidden>
+      <section class="card">
+        <h2>What goes with a Happy report</h2>
+        <p class="small muted">Change in the chance that a report is Happy for one unit more of each factor, with the other factors held fixed.
+          Dots are posterior medians and lines 95% credible intervals. Blue: moderate or strong evidence of a better mood;
+          red: of a worse mood; gray: unclear. The five factors of the confirmatory hypotheses stay gray: they are judged only
+          at the 6- and 12-month analyses set out in the <a href="protocol.html">protocol</a>.</p>
+        <div class="chart" id="effects-chart"></div>
+        <details><summary>Table view</summary>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Factor</th><th>Unit</th><th class="num">Odds ratio (95% CrI)</th><th class="num">Happy, pp</th><th class="num">Sad, pp</th><th class="num">P(better)</th><th>Evidence</th></tr></thead>
+            <tbody id="effects-table"></tbody>
+          </table></div>
+        </details>
+        <p class="small muted" id="no-effects" hidden>No daily factor has enough data yet.</p>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Time of day</h2>
+          <p class="small muted">Chance of a Happy report in each slot.</p>
+          <div class="chart" id="tod-chart"></div>
+        </section>
+        <section class="card">
+          <h2>Weekday</h2>
+          <p class="small muted">Chance of a Happy report on each weekday.</p>
+          <div class="chart" id="weekday-chart"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Mood dynamics</h2>
+        <p id="dynamics"></p>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Method</h2>
+      <p class="small">Each report is modeled with a Bayesian cumulative logit (ordinal) model. The linear predictor adds effects for time of day and weekday
+        (sum-to-zero), the day's factors, and a latent daily mood that follows a stationary first-order autoregressive process, so moods can carry over
+        from one day to the next and days without reports are handled naturally. Factors are standardized; the five in the hypotheses have normal(0, 0.5) priors and the others share a hierarchical shrinkage prior;
+        cutpoints are ordered. Factors enter only with information available before the day's reports: last night's sleep and physiology, yesterday's
+        behavior, and same-day context such as weather or a work day. Missing factor values are imputed within the model, which assumes they are missing
+        at random. The model is written in Stan and fitted from R with cmdstanr (NUTS, four chains), with convergence checked by R-hat, effective sample size and divergences.</p>
+      <p class="small">"Evidence" is the posterior probability that an effect points the way shown: strong at 97.5% or more (the 95% interval excludes zero),
+        moderate at 90%, weak at 75%. With many factors some moderate results will be chance findings. These are associations in observational data
+        from one person; they are not causal effects and say nothing about anyone else.</p>
+    </section>
+    <p class="small muted">A Study On Myself · estimates only, no data · <a href="protocol.html">study protocol</a></p>
+  </main>
+  <script src="charts.js"></script>
+  <script src="results.js"></script>
+</body>
+</html>

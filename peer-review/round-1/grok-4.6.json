@@ -1,0 +1,155 @@
+{
+  "verdict": "revise",
+  "summary": "This is a careful N-of-1 protocol: ordinal AR(1) model, lagged factors, decision rule, privacy design, and software that mostly matches the text. It is not yet final. Three errors block acceptance. The status line says data collection has started, which is false for this review draft and would make later revisions non-prospective. H3 is not the parameter the model fits, because total screen time and social media time enter together. The claim that every factor uses only information known before the reports is false for same-day weather and evening-logged context. Fix those, then the remaining SPIRIT gaps, connector specifications, and design-analysis mismatches are ordinary revisions.",
+  "prior_points": [],
+  "must_fix": [
+    {
+      "id": "M1",
+      "section": "Administrative Information (Status); 1.1; 4.1",
+      "problem": "The header says data collection started on 19 September 2026, on a version labeled draft for review (round 1). Collection has not started. If collection did start during review, the claim that outcomes, hypotheses, and the model are fixed before study data exist would no longer hold for any revision prompted by this round.",
+      "requested_change": "State that confirmatory data collection starts only after this version is accepted. If any reports already exist, label them as pilot, exclude them from the 6-month and 12-month confirmatory analyses, and give their dates and counts."
+    },
+    {
+      "id": "M2",
+      "section": "1.3 H3; 2.9.5; software/analysis/mood.R PREDICTORS",
+      "problem": "H3a is said to concern screen time other than social media, and H3b more social media time. The fitted predictors are total screen_time_min and social_media_min. Holding total screen time fixed, the social media coefficient is substitution of social media for other screen time, not the effect of more social media. If social media is dropped under the 50% or 10-day rule, H3a silently becomes total screen time.",
+      "requested_change": "When both are observed, enter non-social-media minutes (screen time minus social media) and social media minutes as the two predictors, and judge H3a and H3b on those coefficients. When social media is out of the model, judge H3a on total screen time and report H3b as not testable. State this recoding in 2.9.5 and implement it in mood.R."
+    },
+    {
+      "id": "M3",
+      "section": "Abstract; 2.4 timing rule; 4.1",
+      "problem": "The protocol repeats that factors enter only with information available before the reports they predict. Same-day mean temperature, precipitation, sunshine, and outdoor PM2.5 are completed after morning and afternoon reports. Work, travel, and sick are evening-log flags, so they can use information from after earlier slots and can be consequences of that day's mood.",
+      "requested_change": "Limit the pre-report claim to overnight physiology and lagged behavior. For weather, either lag it or use a forecast known at the start of the day, or call completed-day weather an explicit exception and say morning reports are modeled with rainfall and air quality from later that day. For the context flags, say they are evening-recorded same-day covariates, not pre-report predictors."
+    }
+  ],
+  "should_fix": [
+    {
+      "id": "S1",
+      "section": "Administrative Information; 2.2; 3.1; SPIRIT 2025 items 3a, 4, 11, 13",
+      "problem": "Items that apply are missing: investigator affiliation; country and ordinary setting; SPIRIT 2025 item 11 (patient and public involvement), which requires a statement even when there is none; no intended registry, only a website; no filled SPIRIT 2025 and SPENT 2019 checklist marking N/A items.",
+      "requested_change": "Add affiliation and country. State that there is no separate public involvement because the participant is the investigator. Name an intended registry (OSF is enough if a trial registry will not take an observational N-of-1) or justify none. Attach a filled SPIRIT 2025 plus SPENT 2019 checklist."
+    },
+    {
+      "id": "S2",
+      "section": "2.6; software/analysis/design.R and simulate.R",
+      "problem": "The protocol says 50 studies of 180 days and 50 of 365 days; design.R defaults to 40. True effects are sleep, steps, screen time, work day, and temperature; H3b and H4 are simulated as nulls with complete data. Optional confirmatory factors will not be complete in the real study. The summary is per factor, not the chance that at least one of the six confirmatory tests is supported under a global null.",
+      "requested_change": "Set the default (or the command you will run) to 50 and 50. Put signed effects on the confirmatory factors, including H3b and H4. Simulate screen time, social media, and social time with missingness like the evening log. Report, for 180 and 365 days, how often each hypothesis is supported and how often at least one confirmatory test is supported when all confirmatory effects are zero."
+    },
+    {
+      "id": "S3",
+      "section": "2.4 Ultrahuman Partner API and Amazon monitor (specification)",
+      "problem": "The connectors are specified too thinly to implement or audit. Ultrahuman: resources, HRV statistic, mapping of a sleep session onto the 4 AM study date, and disagreement with Apple Health are unspecified. Amazon: unofficial methods, token scopes, VOC units, whether the daily mean uses the study day or the calendar day, and the 12-hour rule when the computer is asleep at night (so night air is systematically missing) are unspecified.",
+      "requested_change": "Add a short specification for each connector covering those points, including that a night-biased indoor mean is not a 24-hour mean, and that switching a factor from Apple Health to the Partner API is an amendment modeled as a break."
+    },
+    {
+      "id": "S4",
+      "section": "2.9.6; software/analysis/",
+      "problem": "Day satisfaction is a secondary objective with a full model in prose, but no Stan program, and the text postpones implementation until before the 6-month analysis. That leaves the secondary model tunable after observational data exist.",
+      "requested_change": "Add and lock the secondary model in the software now, with the same versioning as ordinal-ar1-stan-v3, and say that any later change is an amendment. State how missing evening ratings are handled (days without a rating dropped, not imputed)."
+    },
+    {
+      "id": "S5",
+      "section": "2.3.1; 2.9.1; 2.9.4",
+      "problem": "Extra reports in a slot are kept and treated as independent given the day effect. Days with more reports pull the factor coefficients more. That is a report-level estimand, not a day-level one, and it interacts with skipping prompts in bad moods.",
+      "requested_change": "State that the estimand is report-level (days with more taps get more weight), or keep one report per slot (first, or random). If extras are kept, say so in 2.9.4."
+    },
+    {
+      "id": "S6",
+      "section": "1.3 H3 and H4; 2.4; 2.9.3",
+      "problem": "H3 and H4 depend on optional evening entries. Under the 50% and 10-day rule they can be not testable at 6 or 12 months. The design analysis fills those fields every day, so it overstates power.",
+      "requested_change": "Make screen time, social media time, and in-person social time required evening fields, or give a completeness target and the date at which a still-sparse confirmatory factor is declared not testable."
+    },
+    {
+      "id": "S7",
+      "section": "2.4 citations",
+      "problem": "Roenneberg et al. (2003) is about chronotype and sleep timing, not mood by time of day or weekday. Power et al. (2015) links past PM2.5 to prevalent anxiety in a cohort, not momentary mood. Neither supports the attached sentence as written.",
+      "requested_change": "Cite evidence on diurnal or weekly mood variation for the time-of-day and weekday effects, and cite work on short-term pollution and affect (or describe Power as background on PM2.5 and anxiety, not as evidence for this outcome)."
+    },
+    {
+      "id": "S8",
+      "section": "2.9.7; 2.9.10; 3.2; software/server/maintenance.ts publicResults; routes.ts homepage headline",
+      "problem": "The confirmatory rule is said to run only at 6 and 12 months, but every successful refit publishes direction and evidence labels at the same 0.975, 0.90, and 0.75 cuts, and the private home page highlights strong and moderate effects from the first eligible fit.",
+      "requested_change": "Do not publish strong or moderate labels for confirmatory factors before the 12-month analysis (or show them only at the 6-month interim, marked as interim). Keep numerical intervals and p_positive if you want live estimates."
+    },
+    {
+      "id": "S9",
+      "section": "2.9.3",
+      "problem": "Remaining gaps are imputed as independent N(0, 1) draws. A night without the ring makes sleep, efficiency, HRV, resting heart rate, and skin temperature missing together. Independent draws invent impossible combinations and ignore a single missingness event.",
+      "requested_change": "Impute overnight metrics jointly, or add a worn-or-not indicator and skip independent imputation for that block. Keep the planned check that device missingness depends on mood."
+    },
+    {
+      "id": "S10",
+      "section": "2.9.9",
+      "problem": "Sensitivity (4) is already an exploratory analysis. Sensitivity (7) does not name the metric model. Sensitivity (3) does not say whether a day is dropped if any confirmatory factor is missing or only if that factor is missing.",
+      "requested_change": "Define the metric model (same linear predictor, numeric 1, 2, 3). Define complete-case as dropping a report's day when that confirmatory factor is missing, and say whether other factors may still be imputed. Drop same-day behavior from the confirmatory sensitivity list or mark it as exploratory only."
+    },
+    {
+      "id": "S11",
+      "section": "1.2 last sentence; 3.3; software/README.md License",
+      "problem": "The study is said to provide open software, but 3.3 says the code can be shared on request. The software is GPL-3.0.",
+      "requested_change": "Say whether the repository is public, name the license, and drop 'on request' if the code will be public."
+    },
+    {
+      "id": "S12",
+      "section": "2.10; 4.2",
+      "problem": "Embedded experiments cannot be blinded: the participant is the investigator, knows the hypotheses, and sees live estimates. SPENT items on sequence, allocation concealment, periods, and washout are deferred to later amendments, which is acceptable only if stated.",
+      "requested_change": "State that experiments are unblinded self-experiments. Say that SPENT 2019 items for periods, sequence, concealment, and washout will be in each experiment's amendment, and that version 3.0 only fixes the observational phase plus this template."
+    },
+    {
+      "id": "S13",
+      "section": "2.4 weather; software/server/maintenance.ts syncWeather",
+      "problem": "Weather is described as complete days, but the cutoff is UTC yesterday, which can still be the local study day. Weather is also always for the configured home coordinates, including travel days, which the protocol does not say.",
+      "requested_change": "Define a complete day in the participant's time zone. State that Open-Meteo values are for the fixed home location even when the travel flag is set."
+    }
+  ],
+  "minor": [
+    {
+      "id": "m1",
+      "section": "2.3.1",
+      "problem": "The delay between report and receipt is not a stored field; recorded_at and created_at are stored and the delay can be computed.",
+      "requested_change": "Say that both timestamps are stored so the delay can be computed for the two-hour sensitivity analysis."
+    },
+    {
+      "id": "m2",
+      "section": "2.8; software/server/maintenance.ts",
+      "problem": "Backups run when 20 hours have passed during the hourly job, and only if BACKUP_GPG_RECIPIENT is set, not once each calendar day by default.",
+      "requested_change": "Say an encrypted snapshot is taken when the hourly job finds that about a day has passed since the last one, after a GPG recipient is configured, and that the last 30 files are kept."
+    },
+    {
+      "id": "m3",
+      "section": "2.9.3; software/analysis/mood.R",
+      "problem": "The code also drops a factor that never varies on rated days. The protocol does not mention that rule.",
+      "requested_change": "Add zero variance as a reason a factor is left out and shown under dropped."
+    },
+    {
+      "id": "m4",
+      "section": "2.3.3; software/server/stats.ts",
+      "problem": "Adherence is defined as the weekly share of slots with a report, but the app shows a 14-day overall completion rate, and public results do not include adherence.",
+      "requested_change": "Either compute and display weekly slot adherence, or define adherence as the 14-day rate the dashboard already shows."
+    },
+    {
+      "id": "m5",
+      "section": "Revision History version 3.0 versus 2.4 last paragraph",
+      "problem": "The revision history presents Partner API collection and indoor air as completed in 3.0, while 2.4 says those connectors are still being added.",
+      "requested_change": "In the revision history, mark those items as specified and in progress, not completed."
+    },
+    {
+      "id": "m6",
+      "section": "2.3.2; Kuppens et al., 2010",
+      "problem": "Kuppens et al. (2010) study moment-to-moment emotional inertia. Daily phi is related but not the same index.",
+      "requested_change": "Call phi day-to-day carry-over, and say it is analogous to, not identical with, emotional inertia as in Kuppens et al."
+    },
+    {
+      "id": "m7",
+      "section": "2.9.8",
+      "problem": "Bulk ESS is checked on cutpoints, time of day, weekday, phi, sigma, tau, and beta, not on the day effects or imputed cells. The text says every reported parameter.",
+      "requested_change": "Name the parameters that must pass the ESS and R-hat rule, matching summarize_fit in mood.R."
+    },
+    {
+      "id": "m8",
+      "section": "2.7; 3.2; software/README.md",
+      "problem": "Tailscale HTTPS certificates put the machine name in public Certificate Transparency logs. The protocol does not mention that.",
+      "requested_change": "Note that the Tailscale hostname can appear in public CT logs, as the README already does."
+    }
+  ]
+}

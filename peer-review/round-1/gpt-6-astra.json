@@ -1,0 +1,185 @@
+{
+  "verdict": "revise",
+  "summary": "Core ordinal AR(1) model matches its mathematical specification, but statistical errors, software contradictions, privacy failures, and unresolved ethics requirements prevent acceptance. Pending connectors and design-analysis results are not themselves objections. Review used source inspection, primary references, and selected read-only probes; a full Stan fit was not run.",
+  "prior_points": [],
+  "must_fix": [
+    {
+      "id": "M1",
+      "section": "Administrative Information",
+      "problem": "Status says collection started September 19, 2026, contradicting the supplied context that collection has not started.",
+      "requested_change": "Correct collection status and distinguish planned start, protocol finalization, and actual first collection dates."
+    },
+    {
+      "id": "M2",
+      "section": "Abstract; Sections 2.4 and 2.9.3",
+      "problem": "The universal claim that factors contain only information available before reports conflicts with same-day full-day weather and context recorded in the evening. Weather being unaffected by mood does not make its completed daily summary available beforehand.",
+      "requested_change": "State explicit exceptions for retrospective contemporaneous associations, or change exposure windows to enforce temporal precedence. Distinguish predetermined context from events or assessments occurring after reports."
+    },
+    {
+      "id": "M3",
+      "section": "Section 2.4; software/server/maintenance.ts:69",
+      "problem": "Weather collection is described as covering complete days, but syncWeather() calculates yesterday in UTC while requesting daily aggregation in the user's time zone. During Toronto evenings, it can request the still-incomplete local day.",
+      "requested_change": "Calculate the last complete date in the aggregation time zone. Document whether weather uses calendar days or the 4 AM study-day boundary."
+    },
+    {
+      "id": "M4",
+      "section": "Section 2.9.3",
+      "problem": "The statement that skipped reports bias effect estimates only when skipping also depends on factors is false. Observation depending on ordinal mood alone can change cumulative-logit slopes, without additional direct dependence on predictors.",
+      "requested_change": "Remove this claimed protection and acknowledge that mood-dependent nonresponse can bias associations as well as average mood."
+    },
+    {
+      "id": "M5",
+      "section": "Section 2.9.4; software/analysis/mood.R:220",
+      "problem": "Probability comparisons for work, travel, and sickness add one to every observed value. Reports already at 1 therefore compare the impossible value 2 with 1, despite labels such as 'work day vs. day off.'",
+      "requested_change": "For binary factors, predict each report with the factor set to 1 and to 0, then average their probability difference. Specify this contrast separately from continuous increments."
+    },
+    {
+      "id": "M6",
+      "section": "Section 2.9.8; software/analysis/refit.R; software/scripts/cli.ts",
+      "problem": "Fits are not used only after passing convergence criteria. summarize_fit() records a Boolean, but refit.R still saves draws and returns status 'done'; subsequent code displays, publishes, and uses those fits for predictions.",
+      "requested_change": "Enforce the stated convergence gate, or accurately describe flagged display and specify which inferential uses are prohibited. Prespecify remediation when diagnostics fail."
+    },
+    {
+      "id": "M7",
+      "section": "Sections 2.9.5 and 2.9.7; software/analysis/mood.R:223",
+      "problem": "Directional probabilities are rounded before evidence classification. For example, 3899 positive draws out of 4000 gives 0.97475, which rounds to 0.975 and receives 'strong' evidence despite missing the stated threshold.",
+      "requested_change": "Apply all decision thresholds to unrounded probabilities and round only displayed values."
+    },
+    {
+      "id": "M8",
+      "section": "Section 2.6; software/analysis/simulate.R; software/analysis/design.R",
+      "problem": "Simulation coverage uses mismatched truth scales. Generation standardizes complete predictors before missingness and lagging; fitting standardizes observed lagged predictors on rated days. design.R nevertheless compares fitted coefficients directly with TRUE_BETA. simulate.R also calculates the generating odds ratio using the fitted rather than generating standard deviation.",
+      "requested_change": "Retain generating scales or physical-unit slopes, transform truth onto the fitted scale, and recompute coverage and true odds ratios. Account consistently for rounding of generated predictors."
+    },
+    {
+      "id": "M9",
+      "section": "Section 2.9.8; software/package.json",
+      "problem": "Parameter recovery is described as part of the software test suite, but the supplied snapshot contains no analysis/tests/testthat directory, which the test:r command requires. simulate.R prints recovery summaries without automated assertions.",
+      "requested_change": "Supply the referenced executable recovery tests, or describe the existing script accurately as a simulation diagnostic rather than an automated recovery test."
+    },
+    {
+      "id": "M10",
+      "section": "Section 2.7; software/server/pages.ts:186; software/server/routes.ts:145",
+      "problem": "Automatic sources and the evening form can overwrite each other. The form submits all fields, including stale or blank automatic values. A form opened before an automatic update can replace that update; blank submissions become null.",
+      "requested_change": "Preserve intervening updates by submitting only edited fields and resolving conflicts, or adopt another explicit source-precedence mechanism. Correct the absolute nonoverwriting claim."
+    },
+    {
+      "id": "M11",
+      "section": "Sections 2.7 and 3.2; software/server/routes.ts:104",
+      "problem": "Device tokens can read existing daily data through POST responses. A date-only POST to /api/daily/ returns the existing row, including notes and factors. Read-only probing confirmed this behavior. Tokens can also overwrite existing daily values.",
+      "requested_change": "Return an acknowledgment without existing record contents for device submissions, define permitted update scope accurately, and test confidentiality through POST responses as well as blocked GET requests."
+    },
+    {
+      "id": "M12",
+      "section": "Section 3.2; software/server/maintenance.ts:106; software/tests/app.test.ts:225",
+      "problem": "The publication whitelist is not exhaustive at nested levels. time_of_day, weekday, and dynamics pass through wholesale. Unexpected nested notes and daily values survived a read-only probe, while the existing fixed-fixture test does not enforce the claimed guarantee.",
+      "requested_change": "Whitelist nested fields explicitly and test unexpected nested fields in serialized output, or narrow the stated guarantee to what is actually enforced."
+    },
+    {
+      "id": "M13",
+      "section": "Abstract; Section 3.2",
+      "problem": "All study data do not stay on the computer. Queued reports and notes reside in phone localStorage, cached rating pages contain recent tags, and upstream providers retain source data. Password changes and token revocation do not erase phone copies. Application deletion also retains encrypted backups.",
+      "requested_change": "Describe each storage location, protection, retention, and deletion boundary accurately. Explain lost-phone handling and distinguish application deletion from removal of phone copies, backups, and public artifacts."
+    },
+    {
+      "id": "M14",
+      "section": "Sections 2.3.3 and 2.11; software/server/stats.ts:9",
+      "problem": "Promised adherence reporting differs from implementation. completion() reports one rolling 14-day fraction with a fixed denominator of 42, including pre-study or unelapsed slots. It does not provide separate weekly proportions, and public results contain no adherence despite 'alongside every result.'",
+      "requested_change": "Define eligible-slot denominators and implement the stated weekly reporting, or identify it accurately as planned work. Specify how two consecutive weeks below 50% will be assessed."
+    },
+    {
+      "id": "M15",
+      "section": "Section 3.1 Ethics",
+      "problem": "Self-participation does not establish exemption from ethics review, and checking requirements only before publication is too late if prior review applies. Institutional policies can explicitly require review of self-experimentation, as this [UBC policy](https://researchethics.ubc.ca/sites/default/files/documents/Self-experimentation.pdf) illustrates.",
+      "requested_change": "Replace the general exemption claim with the applicable institutional and jurisdictional review plan. Resolve approval, exemption, or documented nonapplicability before collection, and reassess before randomized experiments."
+    },
+    {
+      "id": "M16",
+      "section": "Section 2.4, mood-rhythm rationale",
+      "problem": "Roenneberg et al. (2003) studies sleep timing, daylight exposure, and chronotype, not daily or weekly mood rhythms. It does not support the attached mood claim. See the [original article](https://doi.org/10.1177/0748730402239679).",
+      "requested_change": "Replace this citation with evidence measuring mood rhythms, or narrow the statement to the outcomes actually studied."
+    }
+  ],
+  "should_fix": [
+    {
+      "id": "S1",
+      "section": "Sections 1.3 and 2.9.5",
+      "problem": "H3b's conditional interpretation remains implicit. With total screen time and social media entered together, its coefficient represents replacing other screen time with social media while holding total screen time fixed.",
+      "requested_change": "State this substitution estimand explicitly. If the intended comparison adds social media while holding other screen time fixed, use the sum of the two physical-unit slopes instead."
+    },
+    {
+      "id": "S2",
+      "section": "Sections 2.9.3 and 2.9.9",
+      "problem": "Independent standard-normal imputation ignores predictor correlations and temporal structure, and permits impossible values for binary indicators. MAR alone does not justify these distributional assumptions.",
+      "requested_change": "Add a sensitivity analysis using predictor-type-appropriate conditional imputation, or assess this approximation under correlated, autocorrelated, and binary predictors in simulation."
+    },
+    {
+      "id": "S3",
+      "section": "Sections 2.3.1 and 2.9.9",
+      "problem": "Complete-case analysis does not assess mood-dependent nonresponse. Additional spontaneous reports can also give unusually good or bad periods greater weight, although the report-weighted estimand is explicitly defined.",
+      "requested_change": "Add an informative-missingness sensitivity analysis and a prespecified comparison using one report per slot or equal day weights. Record prompted versus spontaneous reports where feasible."
+    },
+    {
+      "id": "S4",
+      "section": "Section 2.6; software/analysis/design.R",
+      "problem": "Current simulations provide a narrow assessment: mostly independent predictors, one positive phi value, no active social-media or social-contact alternative, and no stated precision target. Fifty replicates provide limited precision for operating characteristics.",
+      "requested_change": "Prespecify a meaningful interval-width target; include plausible predictor correlations, missingness, phi = 0, and alternatives for H3b and H4. Report Monte Carlo uncertainty, failed-fit handling, and distinguish marginal false-direction rates from family-level error."
+    },
+    {
+      "id": "S5",
+      "section": "Sections 2.9.2 and 2.9.8",
+      "problem": "Prior predictive behavior is not checked, and category-frequency checks alone weakly assess the model's main structural assumptions.",
+      "requested_change": "Add prior predictive checks and posterior checks of within-day clustering, between-day dependence, and threshold-specific associations. Specify the response to substantial lack of fit or unreliable PSIS diagnostics."
+    },
+    {
+      "id": "S6",
+      "section": "Sections 2.4 and 2.8",
+      "problem": "Several measurement rules remain underspecified: actual source and HRV metric, overnight aggregation, overlapping Apple Health samples, standard-drink definition, indoor-monitor placement, and calendar-day alignment during travel. Weather remains tied to configured home coordinates.",
+      "requested_change": "Freeze a factor-level collection dictionary before collection, including source precedence, aggregation windows, units, travel handling, provenance, and recording of device or firmware changes. Specify how source changes enter analysis as breaks."
+    },
+    {
+      "id": "S7",
+      "section": "Section 2.10",
+      "problem": "Prospective experiment amendments are appropriate, but their required content omits explicit treatment estimands, adherence and deviation handling, period effects, masking feasibility, and registration plans.",
+      "requested_change": "Extend the amendment template with these items, allocation concealment, carryover analysis, and appropriate restriction of adjustment to pretreatment variables. Map it to [SPENT](https://www.bmj.com/content/368/bmj.m122) before each experiment."
+    },
+    {
+      "id": "S8",
+      "section": "Sections 2.5 and 2.11",
+      "problem": "Monthly review of the safety rule can miss transient qualifying 14-day periods. Evaluation frequency, handling of sparse reports, and restart criteria after a pause are unspecified.",
+      "requested_change": "Specify a timely manual or automated evaluation schedule, minimum information needed for each trigger, and procedures for pausing and resuming collection or experiments."
+    },
+    {
+      "id": "S9",
+      "section": "Sections 2.9.5, 2.9.10 and 2.11",
+      "problem": "Early-stop analysis is a reasonable prespecified exception, but its relationship to the statements that decisions occur only at 6 and 12 months remains unclear.",
+      "requested_change": "Identify early stopping explicitly as an exception. State whether an early analysis may assign confirmatory categories, and report stopping time and reason alongside its conclusions."
+    },
+    {
+      "id": "S10",
+      "section": "Section 3.2",
+      "problem": "Publishing estimates rather than records reduces disclosure, but these remain health-related estimates about a named individual. The stated privacy cost addresses interim noise without addressing identifiable disclosure or persistent public copies.",
+      "requested_change": "Acknowledge this residual disclosure explicitly, including inference from successive releases and limits on withdrawing archived public results."
+    }
+  ],
+  "minor": [
+    {
+      "id": "m1",
+      "section": "Section 2.1; supplementary reporting checklist",
+      "problem": "The claim of SPIRIT/SPENT completeness is difficult to audit without an item-to-section mapping.",
+      "requested_change": "Provide completed applicable-item checklists, distinguish current observational requirements from future experiment amendments, and explain nonapplicable items, as recommended by [SPIRIT 2025](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004589)."
+    },
+    {
+      "id": "m2",
+      "section": "Sections 2.3.2 and 2.9.1",
+      "problem": "Descriptions of mood dynamics can suggest that phi measures overall observed emotional inertia and sigma measures total daily variability.",
+      "requested_change": "Clarify that phi concerns the residual latent daily process conditional on covariates, and sigma is its innovation standard deviation."
+    },
+    {
+      "id": "m3",
+      "section": "Section 2.4, wearable evidence",
+      "problem": "Evenson et al. reviewed Fitbit and Jawbone evidence available through July 2015, whereas the wording generalizes across wearables. The negative Ultrahuman search also lacks a reproducible query. See [Evenson et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC4683756/).",
+      "requested_change": "Qualify the review's device and date scope, and provide the exact Ultrahuman search date, query, and manufacturer-associated records."
+    }
+  ]
+}
