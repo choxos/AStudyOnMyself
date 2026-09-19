@@ -57,7 +57,8 @@ export function ultrahumanDay(entries: MetricEntry[], finished: boolean): Record
     sleep_hours: pick(minutes === undefined ? undefined : minutes / 60, 2),
     sleep_efficiency: pick(num(sleep.sleep_efficiency?.percentage), 1),
     skin_temp_dev_c: pick(num(sleep.temperature_deviation?.celsius), 2),
-    hrv_ms: pick(num(by.hrv?.avg), 1),
+    // The average during sleep; the "hrv" metric averages the whole calendar day.
+    hrv_ms: pick(num(by.avg_sleep_hrv?.value), 1),
     resting_hr: pick(num(by.night_rhr?.avg), 1),
     steps: finished ? num(by.steps?.total) : undefined,
   });

@@ -365,7 +365,8 @@ describe("automatic sources", () => {
   test("Ultrahuman metrics map onto the daily log, in range only", () => {
     const entries = [
       { type: "sleep", object: { total_sleep: { minutes: 450 }, sleep_efficiency: { percentage: 91 }, temperature_deviation: { celsius: -0.23 } } },
-      { type: "hrv", object: { avg: 0 } }, // no reading: out of range, dropped
+      { type: "hrv", object: { avg: 80 } }, // the whole calendar day: not used
+      { type: "avg_sleep_hrv", object: { value: 0 } }, // no reading: out of range, dropped
       { type: "night_rhr", object: { avg: 54.44 } },
       { type: "steps", object: { total: 8123 } },
     ];

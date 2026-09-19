@@ -25,11 +25,11 @@
 <header class="doc-head">
   <p class="eyebrow">Study protocol</p>
   <h1>A Study On Myself: Protocol for an N‑of‑1 Bayesian Study of Momentary Mood and Daily Satisfaction</h1>
-  <p class="meta"><span class="chip ok">Version 3.0, final</span><span>19 September 2026</span>
+  <p class="meta"><span class="chip ok">Version 3.1, final</span><span>19 September 2026</span>
     <a href="study_protocol.md">Markdown source</a><a href="review.html">How it was reviewed</a></p>
   <details class="more"><summary>Fingerprint</summary>
   <p class="small">SHA-256 of <a href="study_protocol.md">study_protocol.md</a>, so that anyone can check that this is the published version:</p>
-  <p class="hash">e8ef77bffa8d2292da3e902e0c83c7682155b85e1c5ae520679e17b5a5f351dc</p></details>
+  <p class="hash">c79270fedd80e80b6826d8c4b358bba823235786b3a5b8bde779820001213495</p></details>
 </header>
 <div class="doc-layout">
 <aside class="toc-panel"><details open id="toc"><summary>Contents</summary><nav aria-label="Contents">
@@ -132,7 +132,7 @@ and Daily Satisfaction</h1>
 <tbody>
 <tr>
 <td>Protocol version</td>
-<td>3.0, final</td>
+<td>3.1, final</td>
 </tr>
 <tr>
 <td>Date</td>
@@ -147,10 +147,12 @@ class="uri">https://choxos.github.io</a></td>
 </tr>
 <tr>
 <td>Status</td>
-<td>Finalized on 19 September 2026. The pilot ran on 19 September 2026
-(Section 2.12). Confirmatory data collection starts on 20 September
-2026, the day after finalization; that date is recorded in the software
-as the study start, and reports made before it never enter a model.</td>
+<td>Finalized on 19 September 2026 as version 3.0 and corrected as
+version 3.1 the same day, before the study start (Revision History). The
+pilot ran on 19 September 2026 (Section 2.12). Confirmatory data
+collection starts on 20 September 2026, the day after finalization; that
+date is recorded in the software as the study start, and reports made
+before it never enter a model.</td>
 </tr>
 <tr>
 <td>Registration</td>
@@ -239,6 +241,18 @@ implemented; a prior predictive check and a design analysis added;
 weekly adherence, a safety rule, monitoring, privacy boundaries and
 ethics clarified; reviewed by two AI models in four rounds and finalized
 on 19 September 2026 (Section 3.4).</td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>September 2026</td>
+<td>Corrected on 19 September 2026, before the study start, after the
+first check of the Ultrahuman connector against the live service: the
+night’s heart rate variability is the Partner API’s
+<code>avg_sleep_hrv</code>, its average during sleep, and not
+<code>hrv.avg</code>, which averages the whole calendar day and so
+includes readings taken after the day’s reports. The factor’s definition
+is unchanged. The Partner API is the source of the ring’s values from
+the study start. Not sent for review (Section 3.4).</td>
 </tr>
 </tbody>
 </table>
@@ -625,26 +639,25 @@ in advance, but a sick day can follow the day’s mood. None of the
 exceptions is a confirmatory factor. Weather is fetched for the home
 location even on days away from home, which the travel flag marks.</p>
 <p>Automatic collection: collection is automatic wherever a data source
-allows it. Ultrahuman grants access to its Partner API on request; with
-that access, an hourly job on the participant’s computer fetches the
-ring’s nightly and daily metrics for the last three days, so that later
-fetches correct values that were still incomplete. Until access is
-granted, and for exercise and time in daylight in any case, a daily
-iPhone automation reads Apple Health, to which the ring’s app writes its
-data, and posts the values. The same hourly job fetches weather for the
-last complete days in the participant’s time zone and reads the indoor
-air monitor’s current values through the Alexa web service. Amazon
-offers no public interface for the monitor, so the connector uses the
-unofficial interface that home automation software uses, and it can stop
-working when Amazon changes its service. Indoor readings are sampled
-hourly while the computer is awake, so a day’s mean usually covers
-waking hours rather than 24 hours; it is recorded only when at least 12
-hours of that calendar day were sampled. Appendix A describes both
-connectors. Both are implemented and tested with synthetic responses
-shaped like the services’ formats. The Amazon connector has also been
-checked against the live service during the pilot; the Ultrahuman
-connector will be checked when the Partner API token is granted, and
-until then the ring’s values come through Apple Health.</p>
+allows it. Ultrahuman issues a personal token for its Partner API; with
+it, an hourly job on the participant’s computer fetches the ring’s
+nightly and daily metrics for the last three days, so that later fetches
+correct values that were still incomplete. The token was in place at the
+study start, so the Partner API is the source of the ring’s values for
+the whole study; exercise and time in daylight come from Apple Health,
+which a daily iPhone automation reads and posts. The same hourly job
+fetches weather for the last complete days in the participant’s time
+zone and reads the indoor air monitor’s current values through the Alexa
+web service. Amazon offers no public interface for the monitor, so the
+connector uses the unofficial interface that home automation software
+uses, and it can stop working when Amazon changes its service. Indoor
+readings are sampled hourly while the computer is awake, so a day’s mean
+usually covers waking hours rather than 24 hours; it is recorded only
+when at least 12 hours of that calendar day were sampled. Appendix A
+describes both connectors. Both are implemented, tested with synthetic
+responses shaped like the services’ formats, and checked against the
+live services during the pilot; the check of the Ultrahuman connector
+led to the correction in version 3.1 (Revision History).</p>
 <p>Screen time and social media time have no programming interface on
 the iPhone, and time with people, caffeine, alcohol and the context
 flags have no sensor. They are optional entries in the evening log;
@@ -1403,8 +1416,10 @@ protocol. After the fourth round, the protocol text changed only in the
 administrative information, the revision history, the pilot dates in
 Section 2.12, the tense of Sections 3.3 and 3.4, and one clarification
 that the last Grok 4.6 report asked for: the scale on which the
-proportional odds check is reported (Section 2.9.8). Review by AI models
-is not peer review by human experts.</p>
+proportional odds check is reported (Section 2.9.8). Version 3.1, a
+correction of one data field made before the study start (Revision
+History), was not sent for review. Review by AI models is not peer
+review by human experts.</p>
 <h2 id="discussion">4. Discussion</h2>
 <h3 id="strengths">4.1 Strengths</h3>
 <p>Outcomes, factors, timing rules, the model, the hypotheses and the
@@ -1500,14 +1515,15 @@ noon)</td>
 </tr>
 <tr>
 <td>hrv_ms</td>
-<td>Heart rate variability of the same night: the nightly average that
-the Partner API returns (<code>hrv.avg</code>); Ultrahuman states that
-its ring uses RMSSD in its sleep and recovery scores (Ultrahuman, 2026)
-but does not publish how this value is computed, so the factor is the
-device’s value, never combined with another device’s (Apple Health: mean
-of the night’s heart rate variability samples written by the Ultrahuman
-app, which Apple Health stores under its SDNN type whatever statistic
-the device computes)</td>
+<td>Heart rate variability of the same night: the average during sleep
+that the Partner API returns (<code>avg_sleep_hrv</code>; its
+<code>hrv</code> metric averages the whole calendar day and is not
+used); Ultrahuman states that its ring uses RMSSD in its sleep and
+recovery scores (Ultrahuman, 2026) but does not publish how this value
+is computed, so the factor is the device’s value, never combined with
+another device’s (Apple Health: mean of the night’s heart rate
+variability samples written by the Ultrahuman app, which Apple Health
+stores under its SDNN type whatever statistic the device computes)</td>
 <td>same day</td>
 <td>10 ms</td>
 </tr>
@@ -2055,7 +2071,7 @@ explanation in psychology: Lessons from machine learning.
   <footer class="site-footer"><div class="bar">
     <p>A Study On Myself is an N-of-1 study of one person's mood, by <a href="https://choxos.github.io">Ahmad Sofi-Mahmudi</a>.
       Only model estimates are published; the data stay on the participant's own computer.</p>
-    <p><a href="protocol.html">Protocol 3.0, final</a> · <a href="review.html">Review record</a> · <a href="https://github.com/choxos/AStudyOnMyself">Source code (GPL-3.0)</a></p>
+    <p><a href="protocol.html">Protocol 3.1, final</a> · <a href="review.html">Review record</a> · <a href="https://github.com/choxos/AStudyOnMyself">Source code (GPL-3.0)</a></p>
   </div></footer>
   <script src="site.js"></script>
 </body>
