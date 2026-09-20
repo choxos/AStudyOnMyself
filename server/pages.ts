@@ -247,6 +247,7 @@ export function trendsPage(o: {
   session: Session; weekly: unknown; total: Shares; bySlot: (Shares & { label: string })[]; byWeekday: (Shares & { label: string })[];
   adherence: { week: string; answered: number; eligible: number; share: number }[];
   prompted: { reports: number; prompted: number };
+  completeness: { of: number; rows: { label: string; days: number; share: number }[] };
   tags: Record<string, any>[]; tagsAsOf: string | null;
 }): Html {
   const recent = o.adherence.slice(-12).reverse();
@@ -267,6 +268,16 @@ export function trendsPage(o: {
       <td class="num">${pct(w.share)}${w.share < 0.5 ? " (below 50%)" : ""}</td></tr>`)}</tbody></table></div>`
   : html`<p class="muted">No reports yet.</p>`}
   ${o.prompted.reports ? html`<p class="small muted">${o.prompted.prompted} of ${o.prompted.reports} reports came within an hour after a reminder.</p>` : ""}
+</section>
+<section class="card">
+  <h2>Completeness of the daily factors</h2>
+  ${o.completeness.of ? html`<p class="small muted">Days with a value, out of the ${o.completeness.of} finished day(s) since the study start.
+    A factor recorded on fewer than half of the days with reports is left out of the model.</p>
+  <details><summary>Table</summary><div class="table-wrap"><table>
+    <thead><tr><th>Factor</th><th class="num">Days</th><th class="num">Share</th></tr></thead>
+    <tbody>${o.completeness.rows.map((c) => html`<tr><td>${c.label}</td><td class="num">${c.days}</td>
+      <td class="num">${pct(c.share)}${c.share < 0.5 ? " (below half)" : ""}</td></tr>`)}</tbody></table></div></details>`
+  : html`<p class="muted">Shown from the second study day on.</p>`}
 </section>
 <div class="grid">
   <section class="card"><h2>By time of day</h2>${sharesTable(o.bySlot, "Slot")}</section>
@@ -405,7 +416,7 @@ ${jsonScript("chart-data", o.charts)}`);
 export function settingsPage(o: {
   session: Session; timeZones: string[]; errors: Record<string, string>; newToken: string | null; apiBase: string; host: string;
   tokens: { id: number; name: string; created_at: string; last_used_at: string | null }[];
-  weatherOn: boolean; backupOn: boolean; lastBackup: string | null; publishOn: boolean; dataDir: string;
+  weatherOn: boolean; backupOn: boolean; lastBackup: string | null; backupStale: boolean; publishOn: boolean; dataDir: string;
   reminderTimes: string[]; remindersOn: boolean; pushDevices: number;
 }): Html {
   const u = o.session.user;
@@ -472,7 +483,7 @@ Content-Type: application/json
   <h2>Automation</h2>
   <div class="table-wrap"><table><tbody>
     <tr><td>Weather and air quality (Open-Meteo)</td><td>${o.weatherOn ? html`<span class="badge ok">on</span>` : html`<span class="badge">off</span> set WEATHER_LATITUDE and WEATHER_LONGITUDE`}</td></tr>
-    <tr><td>Encrypted backups</td><td>${o.backupOn ? html`<span class="badge ok">on</span> latest: ${o.lastBackup ?? "none yet"}` : html`<span class="badge warn">off</span> set BACKUP_GPG_RECIPIENT`}</td></tr>
+    <tr><td>Encrypted backups</td><td>${o.backupOn ? html`<span class="badge ${o.backupStale ? "warn" : "ok"}">${o.backupStale ? "check" : "on"}</span> latest: ${o.lastBackup ?? "none yet"}${o.backupStale ? ". No backup in the last two days; see logs/maintain.log" : ""}` : html`<span class="badge warn">off</span> set BACKUP_GPG_RECIPIENT`}</td></tr>
     <tr><td>Public results page</td><td>${o.publishOn ? html`<span class="badge ok">on</span> estimates only, never data` : html`<span class="badge">off</span> set PUBLISH_DIR`}</td></tr>
   </tbody></table></div>
   <p class="small muted">Data folder: ${o.dataDir}</p>

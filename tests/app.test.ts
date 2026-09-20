@@ -17,7 +17,7 @@ const auth = await import("../server/auth.ts");
 const { all, run, migrate } = await import("../server/db.ts");
 const { DatabaseSync } = await import("node:sqlite");
 const { studyDayAndSlot, DAILY_FIELDS, addDays } = await import("../server/study.ts");
-const { publicResults, publishTarget } = await import("../server/maintenance.ts");
+const { publicResults, publishTarget, daysSinceLastFetch } = await import("../server/maintenance.ts");
 const { whatIf, drawsPath, fingerprint, publishable } = await import("../server/analysis.ts");
 const sources = await import("../server/sources.ts");
 const { mergeDaily } = await import("../server/maintenance.ts");
@@ -259,6 +259,36 @@ describe("daily log", () => {
     assert.equal(stats.completion(user, 14, morning), 1);
     assert.deepEqual(stats.weeklyAdherence(user, afternoon), [{ week: "2026-03-02", answered: 1, eligible: 2, share: 0.5 }]);
     assert.equal(stats.completion(user, 14, afternoon), 0.5);
+  });
+
+  test("summaries and completeness count from the study start", async () => {
+    const id = await auth.createUser("pilot", PASSWORD, "America/Toronto");
+    const user = { id, username: "pilot", time_zone: "America/Toronto", day_start_hour: 4, study_start: "2026-03-02" };
+    // One pilot report the day before the start, one study report on the first day.
+    for (const [day, rating] of [["2026-03-01", 1], ["2026-03-02", 3]] as const) {
+      run("INSERT INTO ratings (user_id, rating, recorded_at, time_zone, study_date, slot, client_id) VALUES (?, ?, ?, ?, ?, 'morning', ?)",
+        id, rating, `${day}T15:00:00.000Z`, "America/Toronto", day, crypto.randomUUID());
+    }
+    run("INSERT INTO daily_logs (user_id, date, steps) VALUES (?, '2026-03-01', 5000), (?, '2026-03-02', 6000)", id, id);
+    run("INSERT INTO daily_logs (user_id, date, sleep_hours) VALUES (?, '2026-03-03', 7)", id);
+    assert.deepEqual({ ...stats.reportCounts(user) }, { reports: 1, days: 1 });
+    assert.equal(stats.breakdown(user).total.n, 1);
+    assert.equal(stats.breakdown(user).total.happy, 1);
+    // On the third study day, two days are finished: steps on one of them, sleep on the other.
+    const c = stats.completeness(user, new Date("2026-03-04T15:00:00Z"));
+    assert.equal(c.of, 2);
+    assert.deepEqual(c.rows.find((r) => r.label === "Steps"), { label: "Steps", days: 1, share: 0.5 });
+    assert.equal(c.rows.find((r) => r.label === "Sleep (hours)")!.days, 1);
+    assert.deepEqual(stats.completeness(user, new Date("2026-03-02T15:00:00Z")), { of: 0, rows: [] });
+  });
+
+  test("after days without a fetch, the windows reach back, 30 days at most", () => {
+    const day = 86_400_000;
+    const now = Date.parse("2026-10-10T12:00:00Z");
+    assert.equal(daysSinceLastFetch(now, now - 3_600_000), 0);
+    assert.equal(daysSinceLastFetch(now, now - 2.5 * day), 2);
+    assert.equal(daysSinceLastFetch(now, now - 90 * day), 30);
+    assert.equal(daysSinceLastFetch(now, now + day), 0);
   });
 
   test("exports escape CSV and deleting needs confirmation", async () => {
@@ -616,6 +646,41 @@ describe("push reminders", () => {
       run("DELETE FROM push_subscriptions WHERE endpoint = ?", endpoint);
       run("DELETE FROM reminders WHERE user_id = ?", userId);
       run("DELETE FROM ratings WHERE user_id = ? AND study_date = '2026-01-15'", userId);
+      service.close();
+    }
+  });
+});
+
+describe("reminders that fail", () => {
+  test("one that could not be sent is tried again; one refused is recorded and does not count as a prompt", async () => {
+    let answer = 503;
+    const service = createServer((req, res) => {
+      req.resume().on("end", () => res.writeHead(answer).end());
+    });
+    await new Promise<void>((resolve) => service.listen(0, "127.0.0.1", resolve));
+    const ua = createECDH("prime256v1");
+    ua.generateKeys();
+    const endpoint = `http://127.0.0.1:${(service.address() as { port: number }).port}/push/2`;
+    run("INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)",
+      userId, endpoint, ua.getPublicKey().toString("base64url"), Buffer.alloc(16, 9).toString("base64url"));
+    const user = { id: userId, username: "me", time_zone: "America/Toronto", day_start_hour: 4, study_start: null };
+    const reminders = () => all<{ delivered: number; sent_at: string }>("SELECT delivered, sent_at FROM reminders WHERE user_id = ? AND study_date = '2026-01-16'", userId);
+    try {
+      const now = new Date("2026-01-16T15:40:00Z"); // 10:40 in Toronto
+      assert.equal(await push.sendDueReminders(now), 0); // the push service is down
+      assert.equal(reminders().length, 0); // so the slot is free for the next minute
+      answer = 403;
+      assert.equal(await push.sendDueReminders(now), 0); // refused
+      assert.deepEqual(reminders().map((r) => r.delivered), [0]);
+      assert.equal(await push.sendDueReminders(now), 0); // and not tried again
+      const before = stats.promptedReports(user).prompted;
+      run("INSERT INTO ratings (user_id, rating, recorded_at, time_zone, study_date, slot, client_id) VALUES (?, 3, ?, ?, '2026-01-16', 'morning', ?)",
+        userId, new Date(Date.parse(reminders()[0].sent_at) + 10 * 60_000).toISOString(), "America/Toronto", crypto.randomUUID());
+      assert.equal(stats.promptedReports(user).prompted, before);
+    } finally {
+      run("DELETE FROM push_subscriptions WHERE endpoint = ?", endpoint);
+      run("DELETE FROM reminders WHERE user_id = ?", userId);
+      run("DELETE FROM ratings WHERE user_id = ? AND study_date = '2026-01-16'", userId);
       service.close();
     }
   });

@@ -45,13 +45,18 @@ output <- tryCatch(
     start <- study_start(con, user)
     tags <- tag_associations(con, user, start)
     ds <- load_dataset(con, user, start)
+    sampling <- list(
+      iter = as.integer(opt("iter", "2000")), adapt_delta = as.numeric(opt("adapt-delta", "0.95")),
+      prior_scale = as.numeric(opt("prior-scale", "0.5")), confirmatory_scale = as.numeric(opt("confirmatory-scale", "0.5"))
+    )
     fit <- fit_model(
       ds, file.path(here, "mood.stan"), opt("stan-dir"),
-      seed = as.integer(opt("seed", "1")), chains = as.integer(opt("chains", "4")), iter = as.integer(opt("iter", "2000")),
-      adapt_delta = as.numeric(opt("adapt-delta", "0.95")), prior_scale = as.numeric(opt("prior-scale", "0.5")),
-      confirmatory_scale = as.numeric(opt("confirmatory-scale", "0.5"))
+      seed = as.integer(opt("seed", "1")), chains = as.integer(opt("chains", "4")), iter = sampling$iter,
+      adapt_delta = sampling$adapt_delta, prior_scale = sampling$prior_scale, confirmatory_scale = sampling$confirmatory_scale
     )
     results <- summarize_fit(ds, fit, as.numeric(difftime(Sys.time(), started, units = "secs")))
+    # Kept with the fit, so a rerun or a sensitivity analysis can be told from a standard fit.
+    results$model$sampling <- sampling
     jsonlite::write_json(whatif_draws(ds, fit), opt("draws"), auto_unbox = TRUE, digits = 6)
     results$tags <- tags
     list(status = "done", message = "", results = results)

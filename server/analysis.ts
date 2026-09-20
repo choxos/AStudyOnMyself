@@ -78,8 +78,13 @@ export function markInterrupted(): void {
   );
 }
 
-/** Fit the model for one user. Returns the run, or null when skipped. */
-export async function refitUser(userId: number, options: { ifNewData?: boolean } = {}): Promise<Run | null> {
+/**
+ * Fit the model for one user. Returns the run, or null when skipped. iter and
+ * adaptDelta are for the rerun of a fit that failed the convergence checks
+ * (protocol Section 2.9.5: 4,000 and 0.99); the time limit grows with them.
+ */
+export async function refitUser(userId: number, options: { ifNewData?: boolean; iter?: number; adaptDelta?: number } = {}): Promise<Run | null> {
+  const { iter = 2000, adaptDelta = 0.95 } = options;
   const dataFingerprint = fingerprint(userId);
   const runId = transaction(() => {
     if (get("SELECT 1 FROM analysis_runs WHERE user_id = ? AND status = 'running'", userId)) return null;
@@ -100,8 +105,9 @@ export async function refitUser(userId: number, options: { ifNewData?: boolean }
       [
         path.join(ANALYSIS_DIR, "refit.R"), "--db", DB_PATH, "--user", String(userId), "--out", out,
         "--draws", drawsPath(runId), "--stan-dir", path.join(DATA_DIR, "stan"), "--seed", String(runId),
+        "--iter", String(iter), "--adapt-delta", String(adaptDelta),
       ],
-      { timeout: RUN_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024 },
+      { timeout: RUN_TIMEOUT_MS * Math.max(1, iter / 2000) * (adaptDelta > 0.95 ? 2 : 1), maxBuffer: 16 * 1024 * 1024 },
     );
     const output = JSON.parse(readFileSync(out, "utf8")) as { status: Status; message?: string; results?: Results };
     const results = output.results ?? {};

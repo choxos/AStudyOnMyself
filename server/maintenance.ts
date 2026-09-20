@@ -1,6 +1,6 @@
 // Weather, publishing and backups: the jobs the hourly maintenance run chains.
 import { execFile } from "node:child_process";
-import { copyFileSync, cpSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { backup as sqliteBackup } from "node:sqlite";
 import { promisify } from "node:util";
@@ -91,6 +91,21 @@ export async function syncWeather(days = 7): Promise<string> {
   }
   return `Weather: ${changed} day(s) updated.`;
 }
+
+// ---------------------------------------------------------------- catching up
+
+const LAST_FETCH = path.join(DATA_DIR, "last-fetch");
+
+/**
+ * Whole days since the automatic sources were last fetched, 30 at most. After
+ * days with the computer off, the hourly job widens its fetch windows by this
+ * much, so the days in between are fetched instead of lost.
+ */
+export function daysSinceLastFetch(now = Date.now(), last = existsSync(LAST_FETCH) ? statSync(LAST_FETCH).mtimeMs : now): number {
+  return Math.min(30, Math.max(0, Math.floor((now - last) / 86_400_000)));
+}
+
+export const markFetched = (): void => writeFileSync(LAST_FETCH, `${nowIso()}\n`);
 
 // ---------------------------------------------------------------- publishing
 
@@ -184,6 +199,12 @@ const backups = (): string[] => {
 };
 
 export const lastBackup = (): string | null => backups().at(-1) ?? null;
+
+/** Switched on, yet no backup for two days: the hourly job is failing (a wrong key, say). */
+export function backupStale(): boolean {
+  const newest = lastBackup();
+  return Boolean(BACKUP_GPG_RECIPIENT) && (!newest || Date.now() - statSync(path.join(BACKUP_DIR, newest)).mtimeMs > 2 * 24 * 3600 * 1000);
+}
 
 export function backupDue(): boolean {
   const newest = lastBackup();

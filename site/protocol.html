@@ -25,11 +25,11 @@
 <header class="doc-head">
   <p class="eyebrow">Study protocol</p>
   <h1>A Study On Myself: Protocol for an N‑of‑1 Bayesian Study of Momentary Mood and Daily Satisfaction</h1>
-  <p class="meta"><span class="chip ok">Version 3.1, final</span><span>19 September 2026</span>
+  <p class="meta"><span class="chip ok">Version 3.2, final</span><span>20 September 2026</span>
     <a href="study_protocol.md">Markdown source</a><a href="review.html">How it was reviewed</a></p>
   <details class="more"><summary>Fingerprint</summary>
   <p class="small">SHA-256 of <a href="study_protocol.md">study_protocol.md</a>, so that anyone can check that this is the published version:</p>
-  <p class="hash">c79270fedd80e80b6826d8c4b358bba823235786b3a5b8bde779820001213495</p></details>
+  <p class="hash">a77efe64510bf27fb96a1b355e3c7f8f68999ca1d7db3f69aeec07303fdf31c9</p></details>
 </header>
 <div class="doc-layout">
 <aside class="toc-panel"><details open id="toc"><summary>Contents</summary><nav aria-label="Contents">
@@ -132,11 +132,11 @@ and Daily Satisfaction</h1>
 <tbody>
 <tr>
 <td>Protocol version</td>
-<td>3.1, final</td>
+<td>3.2, final</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>19 September 2026</td>
+<td>20 September 2026</td>
 </tr>
 <tr>
 <td>Investigator and participant</td>
@@ -148,11 +148,13 @@ class="uri">https://choxos.github.io</a></td>
 <tr>
 <td>Status</td>
 <td>Finalized on 19 September 2026 as version 3.0 and corrected as
-version 3.1 the same day, before the study start (Revision History). The
-pilot ran on 19 September 2026 (Section 2.12). Confirmatory data
-collection starts on 20 September 2026, the day after finalization; that
-date is recorded in the software as the study start, and reports made
-before it never enter a model.</td>
+version 3.1 the same day, before the study start; version 3.2, of the
+first study day, corrects descriptions of the software and changes
+nothing in the analysis plan (Revision History). The pilot ran on 19
+September 2026 (Section 2.12). Confirmatory data collection starts on 20
+September 2026, the day after finalization; that date is recorded in the
+software as the study start, and reports made before it never enter a
+model.</td>
 </tr>
 <tr>
 <td>Registration</td>
@@ -253,6 +255,23 @@ night’s heart rate variability is the Partner API’s
 includes readings taken after the day’s reports. The factor’s definition
 is unchanged. The Partner API is the source of the ring’s values from
 the study start. Not sent for review (Section 3.4).</td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>September 2026</td>
+<td>Corrected on 20 September 2026, the first study day, before any
+model was fitted, after a check of the running software against this
+protocol. The software changed in three places, and this protocol now
+describes them: (1) after a period without a successful fetch, the
+hourly job reaches back to the last successful one, not only three days,
+so that a few days with the computer off do not lose ring values
+(Section 2.4, Appendix A); (2) a reminder that could not be sent is
+tried again, and only a reminder the push service accepted counts as
+answered (Section 2.3.1); (3) the dashboard’s descriptive summaries
+leave out the pilot reports and show the completeness of each factor
+(Sections 2.3.3 and 2.9.11). The outcomes, factors, sources, model,
+hypotheses and decision rules are unchanged. Not sent for review
+(Section 3.4).</td>
 </tr>
 </tbody>
 </table>
@@ -422,9 +441,12 @@ the moment of the tap, and the programming interface accepts earlier
 times only up to 14 days back (for reports queued on the phone) and
 rejects anything older. The report time and the receipt time are both
 stored, so the delay can be computed and late entries excluded in a
-sensitivity analysis. Every reminder sent is recorded, so a report made
-within an hour after a reminder in its slot counts as answering it and
-other reports as spontaneous.</p>
+sensitivity analysis. A reminder that cannot be sent, because the
+computer has no network yet after waking or the push service is
+unavailable, is tried again every minute while the slot is open. Every
+reminder sent is recorded, with whether the push service accepted it, so
+a report made within an hour after an accepted reminder in its slot
+counts as answering it and other reports as spontaneous.</p>
 <h4 id="secondary-outcomes">2.3.2 Secondary Outcomes</h4>
 <p>Day satisfaction: once each evening, “All things considered, how
 satisfied were you with today?” on a 0 to 10 scale. This single item
@@ -446,7 +468,7 @@ slots that have begun since the study start, computed per week (Monday
 to Sunday). The private dashboard shows it per week and over the last 14
 days, and the 6- and 12-month reports give it for every week.
 Completeness is the share of study days with a value for each factor, by
-data source.</p>
+data source; the dashboard shows it over the finished study days.</p>
 <h3 id="factors-and-data-sources">2.4 Factors and Data Sources</h3>
 <table style="width:100%;">
 <colgroup>
@@ -642,13 +664,17 @@ location even on days away from home, which the travel flag marks.</p>
 allows it. Ultrahuman issues a personal token for its Partner API; with
 it, an hourly job on the participant’s computer fetches the ring’s
 nightly and daily metrics for the last three days, so that later fetches
-correct values that were still incomplete. The token was in place at the
-study start, so the Partner API is the source of the ring’s values for
-the whole study; exercise and time in daylight come from Apple Health,
-which a daily iPhone automation reads and posts. The same hourly job
-fetches weather for the last complete days in the participant’s time
-zone and reads the indoor air monitor’s current values through the Alexa
-web service. Amazon offers no public interface for the monitor, so the
+correct values that were still incomplete. After a period without a
+successful fetch, because the computer was off or a service could not be
+reached, the job reaches back to the last successful one, 30 more days
+at most, for the ring and for the weather, so that those days are
+fetched later instead of lost. The token was in place at the study
+start, so the Partner API is the source of the ring’s values for the
+whole study; exercise and time in daylight come from Apple Health, which
+a daily iPhone automation reads and posts. The same hourly job fetches
+weather for the last complete days in the participant’s time zone and
+reads the indoor air monitor’s current values through the Alexa web
+service. Amazon offers no public interface for the monitor, so the
 connector uses the unofficial interface that home automation software
 uses, and it can stop working when Amazon changes its service. Indoor
 readings are sampled hourly while the computer is awake, so a day’s mean
@@ -1220,14 +1246,15 @@ model specification gets a new model version string, shown with the
 published results, and a dated entry in the revision history.</p>
 <h4 id="descriptive-analyses">2.9.11 Descriptive Analyses</h4>
 <p>Weekly shares of Happy and Sad reports, shares by slot and by
-weekday, weekly adherence, the share of reports that answer a reminder,
-and tag associations (the difference in the share of Happy reports with
-and without a tag, with Beta(1, 1) posteriors recomputed at every refit)
-are shown on the participant’s private dashboard, together with a
-one-day forecast. They are unadjusted; tag associations are same-moment,
-so a tag can be a cause of mood or a consequence of it. The forecast is
-a convenience for the participant, and its accuracy is not an objective
-of this study.</p>
+weekday, weekly adherence, the completeness of each factor, the share of
+reports that answer a reminder, and tag associations (the difference in
+the share of Happy reports with and without a tag, with Beta(1, 1)
+posteriors recomputed at every refit) are shown on the participant’s
+private dashboard, together with a one-day forecast. They use the
+reports made from the study start, like the model, and are unadjusted;
+tag associations are same-moment, so a tag can be a cause of mood or a
+consequence of it. The forecast is a convenience for the participant,
+and its accuracy is not an objective of this study.</p>
 <h3 id="embedded-n-of-1-experiments">2.10 Embedded N-of-1
 Experiments</h3>
 <p>After the 12-month analysis, the factors under the participant’s
@@ -1417,9 +1444,10 @@ administrative information, the revision history, the pilot dates in
 Section 2.12, the tense of Sections 3.3 and 3.4, and one clarification
 that the last Grok 4.6 report asked for: the scale on which the
 proportional odds check is reported (Section 2.9.8). Version 3.1, a
-correction of one data field made before the study start (Revision
-History), was not sent for review. Review by AI models is not peer
-review by human experts.</p>
+correction of one data field made before the study start, and version
+3.2, which describes three changes to the software made on the first
+study day (Revision History), were not sent for review. Review by AI
+models is not peer review by human experts.</p>
 <h2 id="discussion">4. Discussion</h2>
 <h3 id="strengths">4.1 Strengths</h3>
 <p>Outcomes, factors, timing rules, the model, the hypotheses and the
@@ -1657,20 +1685,21 @@ time, time zone, study date, slot, note and tags</td>
 </tbody>
 </table>
 <p>Ultrahuman connector: the software requests
-<code>daily_metrics</code> for each of the last three dates from the
-Ultrahuman Partner API with the participant’s token, files the returned
-values under the requested date only when the answer contains that date
-(sleep under the date the night ended) and otherwise stores nothing for
-it, stores steps only for finished days, and drops values outside the
-plausible ranges. Amazon connector: the participant registers the
-software once as an Alexa app by signing in on Amazon’s own page; the
-software keeps only the resulting refresh token, and each hour exchanges
-it for web cookies, finds the air quality monitor in the account’s
-device list and reads its current values: PM2.5 in µg/m³, volatile
-organic compounds as an index, carbon monoxide in parts per million,
-humidity in percent, temperature in °C and Amazon’s air quality score.
-Only PM2.5 and volatile organic compounds enter the model; the others
-are stored for description.</p>
+<code>daily_metrics</code> for each of the last three dates (and for the
+dates back to the last successful fetch, 30 more at most, after a period
+without one) from the Ultrahuman Partner API with the participant’s
+token, files the returned values under the requested date only when the
+answer contains that date (sleep under the date the night ended) and
+otherwise stores nothing for it, stores steps only for finished days,
+and drops values outside the plausible ranges. Amazon connector: the
+participant registers the software once as an Alexa app by signing in on
+Amazon’s own page; the software keeps only the resulting refresh token,
+and each hour exchanges it for web cookies, finds the air quality
+monitor in the account’s device list and reads its current values: PM2.5
+in µg/m³, volatile organic compounds as an index, carbon monoxide in
+parts per million, humidity in percent, temperature in °C and Amazon’s
+air quality score. Only PM2.5 and volatile organic compounds enter the
+model; the others are stored for description.</p>
 <h2 id="appendix-b-reporting-checklist">Appendix B: Reporting
 Checklist</h2>
 <p>SPIRIT 2025 items (Chan et al., 2025) and where this protocol
@@ -2071,7 +2100,7 @@ explanation in psychology: Lessons from machine learning.
   <footer class="site-footer"><div class="bar">
     <p>A Study On Myself is an N-of-1 study of one person's mood, by <a href="https://choxos.github.io">Ahmad Sofi-Mahmudi</a>.
       Only model estimates are published; the data stay on the participant's own computer.</p>
-    <p><a href="protocol.html">Protocol 3.1, final</a> · <a href="review.html">Review record</a> · <a href="https://github.com/choxos/AStudyOnMyself">Source code (GPL-3.0)</a></p>
+    <p><a href="protocol.html">Protocol 3.2, final</a> · <a href="review.html">Review record</a> · <a href="https://github.com/choxos/AStudyOnMyself">Source code (GPL-3.0)</a></p>
   </div></footer>
   <script src="site.js"></script>
 </body>

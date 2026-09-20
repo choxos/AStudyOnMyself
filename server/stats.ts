@@ -1,7 +1,7 @@
 // Plain counts and shares for the dashboard. All inference happens in R.
 import type { User } from "./auth.ts";
 import { all, get } from "./db.ts";
-import { addDays, SLOTS, studyDayAndSlot, weekdayIndex, WEEKDAYS } from "./study.ts";
+import { addDays, DAILY_FIELDS, SLOTS, studyDayAndSlot, weekdayIndex, WEEKDAYS } from "./study.ts";
 
 export const currentStudyDay = (user: User, now = new Date()) => studyDayAndSlot(now, user.time_zone, user.day_start_hour);
 
@@ -69,12 +69,15 @@ function shares(ratings: number[]): Shares {
   return { n, sad: share(1), meh: share(2), happy: share(3) };
 }
 
+// Pilot reports, made before the study start, stay out of every summary, as they stay out of the model.
+const sinceStart = (user: User): string => studyStart(user) ?? "0000-01-01";
+
 /** Share of Happy and Sad reports per week (Monday start); weeks with few reports stay blank. */
 export function weeklyShares(user: User, weeks = 26) {
   const today = currentStudyDay(user).studyDate;
   const start = addDays(today, -(weekdayIndex(today) + 7 * (weeks - 1)));
   const rows = all<{ study_date: string; rating: number }>(
-    "SELECT study_date, rating FROM ratings WHERE user_id = ? AND study_date >= ?", user.id, start,
+    "SELECT study_date, rating FROM ratings WHERE user_id = ? AND study_date >= ? AND study_date >= ?", user.id, start, sinceStart(user),
   );
   const byWeek = new Map<string, number[]>();
   for (const r of rows) {
@@ -97,7 +100,7 @@ export function weeklyShares(user: User, weeks = 26) {
 
 export function breakdown(user: User) {
   const rows = all<{ slot: string; study_date: string; rating: number }>(
-    "SELECT slot, study_date, rating FROM ratings WHERE user_id = ?", user.id,
+    "SELECT slot, study_date, rating FROM ratings WHERE user_id = ? AND study_date >= ?", user.id, sinceStart(user),
   );
   return {
     total: shares(rows.map((r) => r.rating)),
@@ -125,14 +128,38 @@ export function safetyRuleMet(user: User, days = 14): boolean {
   return (reports.n >= 10 && reports.sad / reports.n > 0.5) || lowDays >= 7;
 }
 
-/** Reports since the study start, and how many came within an hour after a reminder in their slot. */
+/** Reports since the study start, and how many came within an hour after a reminder a push service accepted in their slot. */
 export function promptedReports(user: User): { reports: number; prompted: number } {
   const row = get<{ reports: number; prompted: number }>(
     `SELECT count(*) AS reports, coalesce(sum(EXISTS (
-       SELECT 1 FROM reminders m WHERE m.user_id = r.user_id AND m.study_date = r.study_date AND m.slot = r.slot
+       SELECT 1 FROM reminders m WHERE m.user_id = r.user_id AND m.study_date = r.study_date AND m.slot = r.slot AND m.delivered = 1
          AND julianday(r.recorded_at) BETWEEN julianday(m.sent_at) AND julianday(m.sent_at) + 1.0 / 24)), 0) AS prompted
      FROM ratings r WHERE r.user_id = ? AND r.study_date >= ?`,
-    user.id, studyStart(user) ?? "0000-01-01",
+    user.id, sinceStart(user),
   )!;
   return row;
+}
+
+/** Reports and days with reports since the study start. */
+export function reportCounts(user: User): { reports: number; days: number } {
+  return get<{ reports: number; days: number }>(
+    "SELECT count(*) AS reports, count(DISTINCT study_date) AS days FROM ratings WHERE user_id = ? AND study_date >= ?", user.id, sinceStart(user),
+  )!;
+}
+
+/**
+ * Completeness (protocol Section 2.3.3): for each daily field, the finished study
+ * days with a value, out of all finished study days. The monthly review reads it.
+ */
+export function completeness(user: User, now = new Date()): { of: number; rows: { label: string; days: number; share: number }[] } {
+  const start = studyStart(user);
+  const end = addDays(currentStudyDay(user, now).studyDate, -1);
+  if (!start || start > end) return { of: 0, rows: [] };
+  const of = daysBetween(start, end);
+  const fields = DAILY_FIELDS.filter((f) => f.type !== "text");
+  const counts = get<Record<string, number>>(
+    `SELECT ${fields.map((f) => `count(${f.name}) AS ${f.name}`).join(", ")} FROM daily_logs WHERE user_id = ? AND date BETWEEN ? AND ?`,
+    user.id, start, end,
+  )!;
+  return { of, rows: fields.map((f) => ({ label: f.label, days: counts[f.name], share: counts[f.name] / of })) };
 }

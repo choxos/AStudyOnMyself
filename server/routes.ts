@@ -11,7 +11,7 @@ import type { Html } from "./html.ts";
 import {
   ANON_CSRF_COOKIE, cookie, json, newAnonToken, page, redirect, type Req, type Res, Router, safeNext, SESSION_COOKIE, text, withCookie,
 } from "./http.ts";
-import { lastBackup } from "./maintenance.ts";
+import { backupStale, lastBackup } from "./maintenance.ts";
 import { notify, validateReminderTimes, vapidPublicKey } from "./push.ts";
 import * as pages from "./pages.ts";
 import * as stats from "./stats.ts";
@@ -189,8 +189,8 @@ router.add("GET", "/", "session", (req) => {
       "SELECT id, rating, slot, study_date, recorded_at, note, tags FROM ratings WHERE user_id = ? AND study_date = ? ORDER BY recorded_at", user.id, today,
     ),
     completion: stats.completion(user),
-    total: get<{ n: number }>("SELECT count(*) AS n FROM ratings WHERE user_id = ?", user.id)!.n,
-    ratedDays: get<{ n: number }>("SELECT count(DISTINCT study_date) AS n FROM ratings WHERE user_id = ?", user.id)!.n,
+    total: stats.reportCounts(user).reports,
+    ratedDays: stats.reportCounts(user).days,
     latest,
     // Confirmatory factors are judged at 6 and 12 months, so they are not headlined before.
     headline: (results?.predictors ?? [])
@@ -214,7 +214,7 @@ router.add("GET", "/trends/", "session", (req) => {
   const current = finished?.results.data?.study_start === req.user!.study_start;
   return show(req, pages.trendsPage({
     session: req.session!, weekly: stats.weeklyShares(req.user!), adherence: stats.weeklyAdherence(req.user!),
-    prompted: stats.promptedReports(req.user!),
+    prompted: stats.promptedReports(req.user!), completeness: stats.completeness(req.user!),
     total: b.total, bySlot: b.bySlot, byWeekday: b.byWeekday,
     tags: current ? finished?.results.tags ?? [] : [], tagsAsOf: current ? finished?.finished_at?.slice(0, 16).replace("T", " ") ?? null : null,
   }));
@@ -306,7 +306,7 @@ function settings(req: Req, errors: Record<string, string> = {}, newToken: strin
     session: req.session!, timeZones: [...new Set([...timeZones(), user.time_zone])].sort(), errors, newToken,
     apiBase: ASOM_HOST ? `https://${ASOM_HOST}` : `http://127.0.0.1:${PORT}`, host: ASOM_HOST,
     tokens: all("SELECT id, name, created_at, last_used_at FROM device_tokens WHERE user_id = ? ORDER BY id DESC", user.id),
-    weatherOn: Boolean(WEATHER_LATITUDE && WEATHER_LONGITUDE), backupOn: Boolean(BACKUP_GPG_RECIPIENT), lastBackup: lastBackup(),
+    weatherOn: Boolean(WEATHER_LATITUDE && WEATHER_LONGITUDE), backupOn: Boolean(BACKUP_GPG_RECIPIENT), lastBackup: lastBackup(), backupStale: backupStale(),
     publishOn: Boolean(PUBLISH_DIR), dataDir: DATA_DIR,
   }));
 }

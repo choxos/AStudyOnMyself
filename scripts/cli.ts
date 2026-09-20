@@ -2,7 +2,9 @@
 //
 //   create-user NAME       password on stdin (use scripts/create-user.sh)
 //   set-password NAME      password on stdin
-//   refit [--user ID]      fit the model now
+//   refit [--user ID] [--iter N] [--adapt-delta X]
+//                          fit the model now; a fit that failed the convergence checks is
+//                          rerun with --iter 4000 --adapt-delta 0.99 (protocol Section 2.9.5)
 //   maintain               the hourly job: weather, ring, indoor air, refit if data changed,
 //                          publish, daily backup
 //   sync-weather [DAYS]    fill weather for recent complete days (default 7)
@@ -16,7 +18,7 @@ import { createUser, setPassword } from "../server/auth.ts";
 import { BACKUP_GPG_RECIPIENT, DEFAULT_TIME_ZONE } from "../server/config.ts";
 import { all, get } from "../server/db.ts";
 import { createInterface } from "node:readline/promises";
-import { backupDue, backupNow, publish, syncWeather } from "../server/maintenance.ts";
+import { backupDue, backupNow, daysSinceLastFetch, markFetched, publish, syncWeather } from "../server/maintenance.ts";
 import { notify } from "../server/push.ts";
 import { alexaSignInFinish, alexaSignInStart, syncIndoorAir, syncUltrahuman } from "../server/sources.ts";
 
@@ -33,10 +35,10 @@ const usersWithRatings = (only?: string) =>
   all<{ id: number; username: string }>("SELECT DISTINCT u.id, u.username FROM users u JOIN ratings r ON r.user_id = u.id")
     .filter((u) => !only || String(u.id) === only);
 
-async function refit(ifNewData: boolean, only?: string): Promise<void> {
+async function refit(ifNewData: boolean, only?: string, sampling: { iter?: number; adaptDelta?: number } = {}): Promise<void> {
   markInterrupted();
   for (const user of usersWithRatings(only)) {
-    const run = await refitUser(user.id, { ifNewData });
+    const run = await refitUser(user.id, { ifNewData, ...sampling });
     if (!run) {
       log(`${user.username}: data unchanged or a refit is already running; skipped.`);
       continue;
@@ -50,12 +52,14 @@ async function refit(ifNewData: boolean, only?: string): Promise<void> {
   }
 }
 
-/** One failing step (say, no network for weather) must not block the others. */
-async function step(name: string, fn: () => Promise<unknown>): Promise<void> {
+/** One failing step (say, no network for weather) must not block the others. Returns whether it worked. */
+async function step(name: string, fn: () => Promise<unknown>): Promise<boolean> {
   try {
     await fn();
+    return true;
   } catch (error) {
     log(`${name} failed: ${(error as Error).message}`);
+    return false;
   }
 }
 
@@ -75,17 +79,26 @@ switch (command) {
     break;
   }
   case "refit": {
-    const i = args.indexOf("--user");
-    await refit(false, i >= 0 ? args[i + 1] : undefined);
+    const option = (name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
+    const number = (name: string) => (option(name) === undefined ? undefined : Number(option(name)));
+    const sampling = { iter: number("--iter"), adaptDelta: number("--adapt-delta") };
+    if ((sampling.iter !== undefined && !(sampling.iter >= 100)) || (sampling.adaptDelta !== undefined && !(sampling.adaptDelta > 0 && sampling.adaptDelta < 1))) {
+      throw new Error("Usage: refit [--user ID] [--iter N] [--adapt-delta X], with N at least 100 and X between 0 and 1");
+    }
+    await refit(false, option("--user"), sampling);
     break;
   }
-  case "maintain":
-    await step("Weather", async () => log(await syncWeather()));
-    await step("Ultrahuman", async () => log(await syncUltrahuman()));
+  case "maintain": {
+    // After days without a fetch (the computer off, or a service down), reach back to the last one.
+    const extra = daysSinceLastFetch();
+    const weather = await step("Weather", async () => log(await syncWeather(7 + extra)));
+    const ring = await step("Ultrahuman", async () => log(await syncUltrahuman(3 + extra)));
+    if (weather && ring) markFetched();
     await step("Indoor air", async () => log(await syncIndoorAir()));
     await step("Refit", () => refit(true));
     if (BACKUP_GPG_RECIPIENT && backupDue()) await step("Backup", async () => log(await backupNow()));
     break;
+  }
   case "sync-weather":
     log(await syncWeather(Number(args[0] ?? 7)));
     break;

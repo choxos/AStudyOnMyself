@@ -168,6 +168,12 @@ export async function sendDueReminders(now = new Date()): Promise<number> {
     if (!claimed) continue;
     const statuses = await notify(user.id, { title: "A Study On Myself", body: PROMPTS[slot], slot, url: "/rate/" });
     const delivered = statuses.some((s) => s >= 200 && s < 300);
+    // No network yet (the Mac just woke) or a push service in trouble: give the
+    // slot back, so the next minute tries again. A refusal stays recorded.
+    if (!delivered && statuses.every((s) => s === 0 || s === 429 || s >= 500)) {
+      run("DELETE FROM reminders WHERE user_id = ? AND study_date = ? AND slot = ? AND delivered = 0", user.id, studyDate, slot);
+      continue;
+    }
     run("UPDATE reminders SET delivered = ? WHERE user_id = ? AND study_date = ? AND slot = ?", delivered ? 1 : 0, user.id, studyDate, slot);
     if (delivered) sent++;
   }

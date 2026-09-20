@@ -121,8 +121,8 @@ The effects are associations in observational data from one person, conditional 
 
 | Command | What it does |
 |---|---|
-| `node scripts/cli.ts refit` | Fit the model now (and publish the results). |
-| `node scripts/cli.ts maintain` | The hourly job: weather, ring data, indoor air, refit if data changed, publish, daily backup. |
+| `node scripts/cli.ts refit [--iter N] [--adapt-delta X]` | Fit the model now (and publish the results). A fit that failed the convergence checks is rerun with `--iter 4000 --adapt-delta 0.99`, as the protocol prescribes. |
+| `node scripts/cli.ts maintain` | The hourly job: weather, ring data, indoor air, refit if data changed, publish, daily backup. After days without a successful fetch (the Mac off, a service down) it reaches back to the last one, 30 days at most. |
 | `node scripts/cli.ts sync-weather [DAYS]` | Fill weather and PM2.5 for recent complete days. |
 | `node scripts/cli.ts sync-ring [DAYS]` | Fetch Ultrahuman ring metrics for recent days (needs `ULTRAHUMAN_TOKEN`). |
 | `node scripts/cli.ts alexa-login` | Sign in to Amazon once for the indoor air monitor. |
@@ -143,7 +143,7 @@ Deleting or fixing a report older than 30 days (the `/ratings/` page covers the 
 - Reminders fire at fixed times rather than random ones, which can tie mood to habitual moments; the protocol discusses this.
 - Weather is for the configured location, even while traveling.
 - A failed refit is retried when the data next change, not on a timer.
-- `day_satisfaction` is collected as a secondary outcome but not modeled yet.
+- `day_satisfaction`, the secondary outcome, is modeled by `analysis/secondary.R` at the 6- and 12-month analyses, not by the hourly job.
 
 ## Project layout
 
