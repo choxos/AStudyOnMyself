@@ -13,7 +13,7 @@ const execFileAsync = promisify(execFile);
 const ANALYSIS_DIR = path.join(ROOT, "analysis");
 const KEEP_FULL_RUNS = 10; // older runs keep only their effect estimates
 const RUN_TIMEOUT_MS = 30 * 60 * 1000;
-const STALE_MS = 2 * 3600 * 1000;
+const STALE_MS = 3 * 3600 * 1000; // longer than the longest time limit, a rerun's two hours
 
 export type Status = "running" | "done" | "waiting" | "failed";
 

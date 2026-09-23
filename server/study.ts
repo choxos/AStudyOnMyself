@@ -34,6 +34,10 @@ export function studyDayAndSlot(instant: Date, timeZone: string, dayStartHour = 
   return { studyDate: new Date(day).toISOString().slice(0, 10), slot };
 }
 
+/** A real calendar date as YYYY-MM-DD; Date.parse alone accepts 2026-02-31, which R reads as missing. */
+export const isIsoDate = (value: unknown): value is string =>
+  typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(Date.parse(`${value}T00:00:00Z`) || 0).toISOString().startsWith(value);
+
 export const addDays = (isoDate: string, days: number): string =>
   new Date(Date.parse(`${isoDate}T00:00:00Z`) + days * 24 * 3600 * 1000).toISOString().slice(0, 10);
 
@@ -124,8 +128,8 @@ export const LOG_SECTIONS: { title: string; fields: FieldSpec[] }[] = [
       { name: "exercise_min", label: "Exercise (min)", type: "int", min: 0, max: 1440 },
       { name: "outdoor_min", label: "Time outdoors (min)", type: "int", min: 0, max: 1440 },
       { name: "social_min", label: "Time with people (min)", type: "int", min: 0, max: 1440, help: "In person with friends or family, not work meetings" },
-      { name: "screen_time_min", label: "Screen time (min)", type: "int", min: 0, max: 1440, help: "iPhone Screen Time total for the day" },
-      { name: "social_media_min", label: "Social media (min)", type: "int", min: 0, max: 1440, help: "Screen Time, Social category" },
+      { name: "screen_time_min", label: "Screen time (min)", type: "int", min: 0, max: 1440, help: "iPhone Screen Time total for this date; once the day is over, so the total is complete" },
+      { name: "social_media_min", label: "Social media (min)", type: "int", min: 0, max: 1440, help: "Screen Time, Social category, for this date; once the day is over" },
       { name: "caffeine_mg", label: "Caffeine (mg)", type: "int", min: 0, max: 2000, help: "Brewed coffee about 95, espresso 63, black tea 47" },
       { name: "alcohol_units", label: "Alcohol (standard drinks)", type: "float", min: 0, max: 50, help: "341 mL beer, 142 mL wine or 43 mL spirits each" },
     ],
@@ -196,7 +200,7 @@ function parseField(field: FieldSpec, raw: unknown): { value?: DailyValue; error
 export function validateDaily(body: Record<string, unknown>): { date?: string; values?: Record<string, DailyValue>; errors?: Errors } {
   const errors: Errors = {};
   const date = String(body.date ?? "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00Z`))) errors.date = "Required, as YYYY-MM-DD.";
+  if (!isIsoDate(date)) errors.date = "Required, as YYYY-MM-DD.";
   const values: Record<string, DailyValue> = {};
   for (const field of DAILY_FIELDS) {
     if (!(field.name in body)) continue;

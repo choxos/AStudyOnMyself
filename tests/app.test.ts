@@ -217,6 +217,18 @@ describe("daily log", () => {
     assert.equal((await b.post("/api/daily/", { date: "2026-03-10", sleep_hours: 30 })).status, 400);
   });
 
+  test("impossible calendar dates are refused, so no row can break the model", async () => {
+    const b = new Browser();
+    await b.login();
+    for (const date of ["2026-02-31", "2026-13-01", "2026-2-3"]) {
+      assert.equal((await b.post("/api/daily/", { date, steps: 100 })).status, 400, date);
+    }
+    assert.equal((await b.post("/api/daily/", { date: "2028-02-29", steps: 100 })).status, 201);
+    run("DELETE FROM daily_logs WHERE date = '2028-02-29'");
+    // The log page falls back to today for a date that does not exist.
+    assert.ok(!(await (await b.fetch("/log/?date=2026-02-31")).text()).includes("2026-02-31"));
+  });
+
   test("the evening form saves", async () => {
     const b = new Browser();
     await b.login();

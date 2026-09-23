@@ -16,7 +16,7 @@ import { notify, validateReminderTimes, vapidPublicKey } from "./push.ts";
 import * as pages from "./pages.ts";
 import * as stats from "./stats.ts";
 import {
-  addDays, CONFIRMATORY_FIELDS, DAILY_FIELDS, type DailyValue, isTimeZone, type RatingInput, studyDayAndSlot, validateDaily,
+  addDays, CONFIRMATORY_FIELDS, DAILY_FIELDS, type DailyValue, isIsoDate, isTimeZone, type RatingInput, studyDayAndSlot, validateDaily,
   validateRating,
 } from "./study.ts";
 
@@ -140,7 +140,7 @@ router.add("GET", "/api/daily/", "api", (req) => {
 function logDay(req: Req): { day: string; today: string } {
   const today = stats.currentStudyDay(req.user!).studyDate;
   const asked = String(req.query.get("date") ?? req.body.date ?? "");
-  return { day: /^\d{4}-\d{2}-\d{2}$/.test(asked) && !Number.isNaN(Date.parse(asked)) ? asked : today, today };
+  return { day: isIsoDate(asked) ? asked : today, today };
 }
 
 const logPage = (
@@ -333,7 +333,7 @@ router.add("POST", "/settings/", "session", (req) => {
   const studyStart = String(req.body.study_start ?? "");
   if (!isTimeZone(timeZone)) errors.time_zone = "Unknown time zone.";
   if (!Number.isInteger(dayStart) || dayStart < 0 || dayStart > 11) errors.day_start_hour = "A whole hour from 0 to 11.";
-  if (studyStart && !/^\d{4}-\d{2}-\d{2}$/.test(studyStart)) errors.study_start = "Use YYYY-MM-DD.";
+  if (studyStart && !isIsoDate(studyStart)) errors.study_start = "Use YYYY-MM-DD.";
   if (Object.keys(errors).length) return settings(req, errors);
   run("UPDATE users SET time_zone = ?, day_start_hour = ?, study_start = ? WHERE id = ?", timeZone, dayStart, studyStart || null, user.id);
   return flashTo(req, "Settings saved.", "/settings/");

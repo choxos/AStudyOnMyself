@@ -283,9 +283,7 @@ summarize_fit <- function(ds, fit, seconds = 0) {
   d <- extract_draws(ds, fit)
   c1 <- d$cut[, 1]
   c2 <- d$cut[, 2]
-  eta <- d$eta
-  p_happy <- stats::plogis(eta - c2) # vectors of length S recycle down the draws
-  p_sad <- stats::plogis(c1 - eta)
+  eta <- d$eta # draws x reports; vectors of length S (one per draw) recycle down its columns
 
   predictors <- lapply(seq_len(nrow(ds$predictors)), function(j) {
     p <- ds$predictors[j, ]

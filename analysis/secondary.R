@@ -77,10 +77,10 @@ summarize_day_fit <- function(ds, fit) {
       phi = c(interval(as.numeric(dr[, "phi"])), p_positive = round(mean(dr[, "phi"] > 0), 4)),
       sigma_day = interval(as.numeric(dr[, "sigma_day"]))
     ),
-    diagnostics = list(
+    diagnostics = within(list(
       max_rhat = max(diag$rhat, na.rm = TRUE), min_ess_bulk = min(diag$ess_bulk, na.rm = TRUE),
-      divergences = sum(fit$diagnostic_summary(quiet = TRUE)$num_divergent)
-    )
+      min_ess_tail = min(diag$ess_tail, na.rm = TRUE), divergences = sum(fit$diagnostic_summary(quiet = TRUE)$num_divergent)
+    ), converged <- max_rhat < 1.01 && min_ess_bulk > 400 && divergences == 0) # the checks of protocol Section 2.9.8
   )
 }
 
